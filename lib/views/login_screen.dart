@@ -16,7 +16,7 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo.png', height: 100),
+            Image.asset('assets/BiteBackLogoNaranja.png', height: 100),
             Text("Biteback", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             Text("Más baratos, más accesibles.", style: TextStyle(fontSize: 16)),
             SizedBox(height: 20),
