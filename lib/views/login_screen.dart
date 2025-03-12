@@ -24,16 +24,16 @@ class LoginScreen extends StatelessWidget {
             TextField(controller: passwordController, decoration: InputDecoration(labelText: "Contraseña"), obscureText: true),
             SizedBox(height: 20),
             ElevatedButton(
-  onPressed: () => authViewModel.loginWithEmail(
-    emailController.text,
-    passwordController.text,
-    context, // <-- Agregar el tercer parámetro
-  ),
-  child: Text("Iniciar Sesión"),
-),
+              onPressed: () => authViewModel.loginWithEmail(
+                emailController.text,
+                passwordController.text,
+                context, 
+              ),
+              child: Text("Iniciar Sesión"),
+            ),
 
             ElevatedButton(
-              onPressed: () => authViewModel.loginWithGoogle(),
+              onPressed: () => authViewModel.loginWithGoogle(context),
               child: Text("Sign in with Google"),
             ),
           ],
