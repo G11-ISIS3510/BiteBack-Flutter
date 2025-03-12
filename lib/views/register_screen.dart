@@ -121,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ElevatedButton(
               onPressed: () {
                 if (passwordController.text == confirmPasswordController.text) {
-                  authViewModel.registerWithEmail(emailController.text, passwordController.text);
+                  authViewModel.registerWithEmail(emailController.text, passwordController.text, context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Las contraseñas no coinciden")),

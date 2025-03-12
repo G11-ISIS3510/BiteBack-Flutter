@@ -118,10 +118,14 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                authViewModel.loginWithEmail(emailController.text, passwordController.text, context);
+                if (isEmailMode) {
+                  authViewModel.loginWithEmail(emailController.text, passwordController.text, context);
+                } else {
+                  authViewModel.loginWithPhone(phoneController.text, context);
+                }
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: Text("Iniciar sesión →", style: TextStyle(color: Colors.white, fontSize: 18),),
+               child: Text("Iniciar sesión →", style: TextStyle(color: Colors.white, fontSize: 18),),
             ),
             SizedBox(height: 10),
             GestureDetector(
