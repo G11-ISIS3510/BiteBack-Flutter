@@ -14,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController smsCodeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -111,22 +112,42 @@ class _LoginScreenState extends State<LoginScreen> {
             Divider(),
             
             isEmailMode
-                ? TextField(controller: emailController, decoration: InputDecoration(labelText: "Correo Electrónico"))
-                : TextField(controller: phoneController, decoration: InputDecoration(labelText: "Número de Teléfono")),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: "Contraseña"), obscureText: true),
-            
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (isEmailMode) {
-                  authViewModel.loginWithEmail(emailController.text, passwordController.text, context);
-                } else {
-                  authViewModel.loginWithPhone(phoneController.text, context);
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-               child: Text("Iniciar sesión →", style: TextStyle(color: Colors.white, fontSize: 18),),
-            ),
+                ? Column(
+                    children: [
+                      TextField(controller: emailController, decoration: InputDecoration(labelText: "Correo Electrónico")),
+                      TextField(controller: passwordController, decoration: InputDecoration(labelText: "Contraseña"), obscureText: true),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          authViewModel.loginWithEmail(emailController.text, passwordController.text, context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: Text("Iniciar sesión →", style: TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      TextField(controller: phoneController, decoration: InputDecoration(labelText: "Número de Teléfono")),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          authViewModel.registerWithPhone(phoneController.text, context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: Text("Enviar Código"),
+                      ),
+                      TextField(controller: smsCodeController, decoration: InputDecoration(labelText: "Código de Verificación")),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          authViewModel.loginWithPhone(smsCodeController.text, context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: Text("Verificar y Iniciar Sesión"),
+                      ),
+                    ],
+                  ),
             SizedBox(height: 10),
             GestureDetector(
               onTap: () {

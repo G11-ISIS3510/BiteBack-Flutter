@@ -6,7 +6,7 @@ class AuthViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
   User? _user;
   bool _isLoading = false;
-  String? _verificationId;
+  String? verificationId;
 
   User? get user => _user;
   bool get isLoading => _isLoading;
@@ -25,17 +25,18 @@ class AuthViewModel extends ChangeNotifier {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error al iniciar sesión"))
-      );}}
+      );
+    }
+
+  }
 
   Future<void> registerWithEmail(String email, String password, BuildContext context) async {
     _isLoading = true;
     notifyListeners();
-
     _user = await _authService.registerWithEmail(email, password);
-    
     _isLoading = false;
     notifyListeners();
-    
+
     if (_user != null) {
       Navigator.pushReplacementNamed(context, "/home");
     } else {
@@ -55,40 +56,52 @@ class AuthViewModel extends ChangeNotifier {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error al iniciar sesión"))
-      );}
+      );
+    }
   }
 
   Future<void> registerWithPhone(String phoneNumber, BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
-    await _authService.registerWithPhone(phoneNumber, (verificationId) {
-      _verificationId = verificationId;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Código enviado, ingrese el código recibido"))
-      );
-    });
-    
+    await _authService.registerWithPhone(
+      phoneNumber,
+      (String verId) {
+        verificationId = verId;
+        notifyListeners();
+      },
+      (String errorMsg) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $errorMsg"))
+        );
+      },
+    );
+
     _isLoading = false;
     notifyListeners();
   }
 
   Future<void> loginWithPhone(String smsCode, BuildContext context) async {
-    if (_verificationId == null) return;
-    
     _isLoading = true;
     notifyListeners();
-    
-    _user = await _authService.loginWithPhone(_verificationId!, smsCode);
+
+    if (verificationId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Código de verificación no encontrado."))
+      );
+      return;
+    }
+
+    _user = await _authService.loginWithPhone(verificationId!, smsCode);
     
     _isLoading = false;
     notifyListeners();
-    
+
     if (_user != null) {
       Navigator.pushReplacementNamed(context, "/home");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error en la autenticación con teléfono"))
+        SnackBar(content: Text("Error al iniciar sesión con teléfono"))
       );
     }
   }

@@ -51,8 +51,9 @@ class AuthService {
     }
   }
 
-  // Registro con número de teléfono
-  Future<void> registerWithPhone(String phoneNumber, Function(String) codeSent) async {
+  // Registro con Número de Teléfono
+  Future<void> registerWithPhone(
+      String phoneNumber, Function(String) codeSentCallback, Function(String) errorCallback) async {
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
@@ -60,22 +61,26 @@ class AuthService {
           await _auth.signInWithCredential(credential);
         },
         verificationFailed: (FirebaseAuthException e) {
-          print("Error en verificación: $e");
+          print("Error en la verificación de teléfono: $e");
+          errorCallback(e.message ?? "Error desconocido");
         },
         codeSent: (String verificationId, int? resendToken) {
-          codeSent(verificationId);
+          codeSentCallback(verificationId);
         },
-        codeAutoRetrievalTimeout: (String verificationId) {},
+        codeAutoRetrievalTimeout: (String verificationId) {
+          print("Tiempo de espera agotado para el código de verificación.");
+        },
       );
     } catch (e) {
-      print("Error en el registro con teléfono: $e");
+      print("Error al registrar con teléfono: $e");
+      errorCallback(e.toString());
     }
   }
 
-  // Inicio de sesión con número de teléfono
+  // Iniciar sesión con código SMS
   Future<User?> loginWithPhone(String verificationId, String smsCode) async {
     try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      AuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: smsCode,
       );
