@@ -52,3 +52,9 @@ windows/flutter/generated_plugin_registrant.*
 windows/flutter/generated_plugins.cmake
 
 macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Keys 
+android/app/release.keystore
+android/app/google-services.json
+
+android/gradle.properties
