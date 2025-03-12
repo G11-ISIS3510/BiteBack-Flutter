@@ -157,14 +157,34 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categorías"),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Carrito"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
+  return Container(
+    margin: EdgeInsets.all(8.0),
+    decoration: BoxDecoration(
+      color: Colors.grey[300],
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 10,
+          offset: Offset(0, -2),
+        ),
       ],
-    );
-  }
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BottomNavigationBar(
+        backgroundColor: Colors.grey[300],
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
+      ),
+    ),
+  );
+}
+
 }
 
