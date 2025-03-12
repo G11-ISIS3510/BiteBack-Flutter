@@ -4,6 +4,7 @@ import 'viewmodels/auth_viewmodel.dart';
 import 'views/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'views/home_screen.dart';
+import 'views/register_screen.dart';
 
 
 
@@ -28,7 +29,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: "/",
       routes: {
-        "/": (context) => LoginScreen(),
+        "/": (context) => RegisterScreen(),
+        "/login": (context) => LoginScreen(),
         "/home": (context) => HomeScreen(), 
       },
     );
