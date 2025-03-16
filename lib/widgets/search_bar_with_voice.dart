@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
 
 class SearchBarWithVoice extends StatefulWidget {
 
@@ -21,23 +22,24 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice> {
 
   // Método para empezar a escuchar la query
   void _startListening() async {
-    // Verifica que este disponible para escuchar
-    bool available = await _speech.initialize(
-      onStatus: (status) => print("Status: $status"),
-      onError: (error) => print("Error: $error"),
-    );
-
-    // Leva a cabo el proceso de escucha y almacena la query
-    if (available) {
-      setState(() => _isListening = true);
-      _speech.listen(
-        onResult: (result) {
-          setState(() {
+    // Se solicitan los permisos necesarios para usar el microfono
+    var status = await Permission.microphone.request();
+    if (status.isGranted) {
+      bool available = await _speech.initialize();
+      // Si el microfono esta disponible, se prepara para uso
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (result) {
+            setState(() {
             _searchController.text = result.recognizedWords;
-          });
-          widget.onSearch(result.recognizedWords);
-        },
-      );
+            });
+            widget.onSearch(result.recognizedWords);
+          },
+        );
+      }
+    } 
+    else {
     }
   }
 

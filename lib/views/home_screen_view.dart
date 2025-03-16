@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/home_viewmodel.dart';
+import '../widgets/search_bar_with_voice.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -16,7 +17,12 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                _buildSearchBar(),
+                SearchBarWithVoice(
+                  onSearch: (query) {
+                    Provider.of<HomeViewModel>(context, listen: false)
+                        .filterRestaurants(query);
+                  },
+                ),
                 _buildDiscountBanner(),
                 _buildCategories(),
                 _buildNearbyProducts(),
@@ -31,37 +37,23 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-  return Consumer<HomeViewModel>(
-    builder: (context, viewModel, child) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Hola, ${viewModel.userName}!",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 4),
-          Text(
-            viewModel.address, // Ahora muestra la dirección obtenida
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Busca productos, comidas o bebidas",
-          prefixIcon: Icon(Icons.search),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      ),
+    return Consumer<HomeViewModel>(
+      builder: (context, viewModel, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Hola, ${viewModel.userName}!",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 4),
+            Text(
+              viewModel.address,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        );
+      },
     );
   }
 
