@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/auth_viewmodel.dart';
-import 'login_screen.dart';
+import 'register_screen_view.dart';
 
-class RegisterScreen extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  bool isRegisterMode = true;
-  bool isEmailMode = true; // Alternar entre email y teléfono
+class _LoginScreenState extends State<LoginScreen> {
+  bool isRegisterMode = false;
+  bool isEmailMode = true;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController smsCodeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () => setState(() => isRegisterMode = true),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context, 
+                      MaterialPageRoute(builder: (context) => RegisterScreen())
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isRegisterMode ? Colors.orange : Colors.white,
                     foregroundColor: isRegisterMode ? Colors.white : Colors.black,
@@ -51,12 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context, 
-                      MaterialPageRoute(builder: (context) => LoginScreen())
-                    );
-                  },
+                  onPressed: () => setState(() => isRegisterMode = false),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isRegisterMode ? Colors.white : Colors.orange,
                     foregroundColor: isRegisterMode ? Colors.black : Colors.white,
@@ -69,7 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             
             Text("Consigue tus medicamentos", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            Text("Registrarse con:"),
+            Text("Iniciar sesión con:"),
             SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -112,27 +112,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Divider(),
             
             isEmailMode
-                ? TextField(controller: emailController, decoration: InputDecoration(labelText: "Correo Electrónico"))
-                : TextField(controller: phoneController, decoration: InputDecoration(labelText: "Número de Teléfono")),
-            TextField(controller: passwordController, decoration: InputDecoration(labelText: "Contraseña"), obscureText: true),
-            TextField(controller: confirmPasswordController, decoration: InputDecoration(labelText: "Confirmar Contraseña"), obscureText: true),
-            
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (passwordController.text == confirmPasswordController.text) {
-                  authViewModel.registerWithEmail(emailController.text, passwordController.text, context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Las contraseñas no coinciden")),
-                  );
-                }
+                ? Column(
+                    children: [
+                      TextField(controller: emailController, decoration: InputDecoration(labelText: "Correo Electrónico")),
+                      TextField(controller: passwordController, decoration: InputDecoration(labelText: "Contraseña"), obscureText: true),
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          authViewModel.loginWithEmail(emailController.text, passwordController.text, context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: Text("Iniciar sesión →", style: TextStyle(color: Colors.white, fontSize: 18)),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      TextField(controller: phoneController, decoration: InputDecoration(labelText: "Número de Teléfono")),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          authViewModel.registerWithPhone(phoneController.text, context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: Text("Enviar Código"),
+                      ),
+                      TextField(controller: smsCodeController, decoration: InputDecoration(labelText: "Código de Verificación")),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          authViewModel.loginWithPhone(smsCodeController.text, context);
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                        child: Text("Verificar y Iniciar Sesión"),
+                      ),
+                    ],
+                  ),
+            SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                // Implementar recuperación de contraseña
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: Text(
-                "Crear →",
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
+              child: Text("Olvidé mi contraseña. Recuperarla", style: TextStyle(color: Colors.orange)),
             ),
           ],
         ),
