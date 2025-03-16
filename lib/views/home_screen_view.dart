@@ -1,3 +1,5 @@
+// ignore_for_file: use_key_in_widget_constructors, deprecated_member_use, unnecessary_brace_in_string_interps
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/home_viewmodel.dart';
@@ -73,27 +75,42 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildCategories() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _categoryCard("Restaurantes", "assets/restaurants.png"),
-        _categoryCard("Supermercados", "assets/supermarkets.png"),
-      ],
+    return Consumer<HomeViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.categories.isEmpty) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: viewModel.categories.map((category) {
+              return _categoryCard(category);
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 
-  Widget _categoryCard(String title, String imagePath) {
-    return Expanded(
-      child: Card(
-        child: Column(
-          children: [
-            Image.asset(imagePath, height: 80),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
+  Widget _categoryCard(String title) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        title,
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }

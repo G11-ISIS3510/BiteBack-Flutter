@@ -1,4 +1,5 @@
 import 'package:biteback/repositories/business_repository.dart';
+import 'package:biteback/repositories/products_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +11,7 @@ class HomeViewModel extends ChangeNotifier {
 
   // Dependencias a repositorios
   final BusinessRepository _businessRepository = BusinessRepository();
+  final ProductsRepository _productsRepository = ProductsRepository();
 
   // Variables de clase con valores iniciales
   String _userName = "Usuario";
@@ -17,6 +19,8 @@ class HomeViewModel extends ChangeNotifier {
   String _address = "Ubicación no disponible";
   List<Business> _allRestaurants = [];
   List<Business> _filteredrestaurants = [];
+  Set<String> _categories = {};
+
 
   // Getters para exponer los valores
   String get userName => _userName;
@@ -24,12 +28,14 @@ class HomeViewModel extends ChangeNotifier {
   String get address => _address;
   List<Business> get allRestaurants => _allRestaurants;
   List<Business> get filteredRestaurants => _filteredrestaurants;
+  Set<String> get categories => _categories;
 
   // Carga los datos del usuario y su ubicación al instanciarse
   // Carga los restaurantes al instanciarse
   HomeViewModel() {
     _loadUserData();
     _loadRestaurants();
+    _loadCategories();
   }
 
   // Método para obtener el nombre y ubicación del usuario autenticado
@@ -73,5 +79,11 @@ class HomeViewModel extends ChangeNotifier {
       }).toList();
     }
     notifyListeners();
+  }
+
+  // Método para obtener las categorias unicas de comida
+  Future<void> _loadCategories() async {
+    _categories = await _productsRepository.getUniqueCategories();
+    notifyListeners(); 
   }
 }

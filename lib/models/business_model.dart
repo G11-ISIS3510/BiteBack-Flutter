@@ -1,4 +1,6 @@
 class Business {
+
+  // Atributos que modelan un negocio en la aplicación
   final String id;
   final String name;
   final String type;
