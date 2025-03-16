@@ -25,8 +25,8 @@ class BusinessRepository {
           longitude: (data['longitude'] as num).toDouble(), 
           rating: (data['rating'] as num).toDouble(), 
           image: data['image'], 
-          openHour: (data['openHour'] as Timestamp).toDate().hour, 
-          closeHour: (data['closeHour'] as Timestamp).toDate().hour);
+          openHour: (data['openHour'] as num).toInt(), 
+          closeHour: (data['closeHour'] as num).toInt());
       }).toList();
     }
     catch (e) {

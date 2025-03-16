@@ -15,13 +15,15 @@ class HomeViewModel extends ChangeNotifier {
   String _userName = "Usuario";
   UserLocation? _location;
   String _address = "Ubicación no disponible";
-  List<Business> _restaurants = [];
+  List<Business> _allRestaurants = [];
+  List<Business> _filteredrestaurants = [];
 
   // Getters para exponer los valores
   String get userName => _userName;
   UserLocation? get location => _location;
   String get address => _address;
-  List<Business> get restaurants => _restaurants;
+  List<Business> get allRestaurants => _allRestaurants;
+  List<Business> get filteredRestaurants => _filteredrestaurants;
 
   // Carga los datos del usuario y su ubicación al instanciarse
   // Carga los restaurantes al instanciarse
@@ -54,19 +56,22 @@ class HomeViewModel extends ChangeNotifier {
 
   // Método para obtener todos los negocios de tipo restaurante
   Future<void> _loadRestaurants() async {
-    _restaurants = await _businessRepository.getRestaurants();
-    print(_restaurants.length);
-    for (var restaurant in _restaurants) {
-      print("ID: ${restaurant.id}");
-      print("Nombre: ${restaurant.name}");
-      print("Tipo: ${restaurant.type}");
-      print("Latitud: ${restaurant.latitude}");
-      print("Longitud: ${restaurant.longitude}");
-      print("Rating: ${restaurant.rating}");
-      print("Imagen: ${restaurant.image}");
-      print("Horario: ${restaurant.openHour} - ${restaurant.closeHour}");
-      print("-----------------------------");
-    }
+    _allRestaurants = await _businessRepository.getRestaurants();
+    _filteredrestaurants = _allRestaurants;
     notifyListeners(); 
+  }
+
+  // Método para filtrar restaurantes por un nombre
+  void filterRestaurants(String query) {
+    if (query.isEmpty) {
+      _filteredrestaurants = allRestaurants;
+    } 
+    // Se ejecuta la consulta en caso de que exista
+    else {
+      _filteredrestaurants = allRestaurants.where((restaurant) {
+        return restaurant.name.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+    }
+    notifyListeners();
   }
 }
