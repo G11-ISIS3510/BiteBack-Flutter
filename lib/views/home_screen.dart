@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/home_viewmodel.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: _buildBottomNavigationBar(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              _buildSearchBar(),
-              _buildDiscountBanner(),
-              _buildCategories(),
-              _buildNearbyProducts(),
-              _buildRecommendedForYou(),
-              _buildCorrientazos(),
-            ],
+    return ChangeNotifierProvider(
+      create: (_) => HomeViewModel(),
+      child: Scaffold(
+        bottomNavigationBar: _buildBottomNavigationBar(),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                _buildSearchBar(),
+                _buildDiscountBanner(),
+                _buildCategories(),
+                _buildNearbyProducts(),
+                _buildRecommendedForYou(),
+                _buildCorrientazos(),
+              ],
+            ),
           ),
         ),
       ),
@@ -26,11 +31,26 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Text(
-      "Hola, Danny!\nLas Cruces 5-27",
-      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    );
-  }
+  return Consumer<HomeViewModel>(
+    builder: (context, viewModel, child) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Hola, ${viewModel.userName}!",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4),
+          Text(
+            viewModel.address, // Ahora muestra la dirección obtenida
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   Widget _buildSearchBar() {
     return Padding(
@@ -157,34 +177,32 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildBottomNavigationBar() {
-  return Container(
-    margin: EdgeInsets.all(8.0),
-    decoration: BoxDecoration(
-      color: Colors.grey[300],
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 10,
-          offset: Offset(0, -2),
-        ),
-      ],
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.grey[300],
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+    return Container(
+      margin: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
-    ),
-  );
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.grey[300],
+          type: BottomNavigationBarType.fixed,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+            BottomNavigationBarItem(icon: Icon(Icons.category), label: "Categories"),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          ],
+        ),
+      ),
+    );
+  }
 }
-
-}
-
