@@ -7,7 +7,8 @@ import 'package:provider/provider.dart';
 import '../models/product_model.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/search_bar_with_voice.dart';
-import '../widgets/discount_banner.dart'; // Importa el nuevo banner
+import '../widgets/discount_banner.dart';
+import 'product_detail_screen.dart'; // Importa el nuevo banner
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -148,7 +149,7 @@ Widget _categoryCard(String title, String selectedCategory, Function(String) onS
             scrollDirection: Axis.horizontal,
             child: Row(
               children: viewModel.nearbyProducts.map((product) {
-                return _productCard(product);
+                return _productCard(product, context);
               }).toList(),
             ),
           ),
@@ -184,7 +185,7 @@ Widget _buildAllProducts() {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: productsToShow.map((product) {
-                return _productCard(product);
+                return _productCard(product, context);
               }).toList(),
             ),
           ),
@@ -194,64 +195,68 @@ Widget _buildAllProducts() {
   );
 }
 
-Widget _productCard(Product product) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(20), // Aplica el recorte a toda la tarjeta
-    child: Container(
-      margin: EdgeInsets.only(right: 10),
-      width: 160,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white, // Mantiene el fondo blanco sin sombra
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)), 
-                child: Image.network(product.image, height: 100, width: 160, fit: BoxFit.cover),
-              ),
-              if (product.discount > 0)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      "${product.discount.toInt()}% off",
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(height: 5),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+Widget _productCard(Product product, BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailScreen(product: product),
+        ),
+      );
+    },
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: EdgeInsets.only(right: 10),
+        width: 160,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Text(product.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("\$${product.price.toStringAsFixed(2)}",
-                    style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  child: Image.network(product.image, height: 100, width: 160, fit: BoxFit.cover),
+                ),
+                if (product.discount > 0)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        "${product.discount.toInt()}% off",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
               ],
             ),
-          ),
-        ],
+            SizedBox(height: 5),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(product.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("\$${product.price.toStringAsFixed(2)}",
+                      style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
 }
-
-
-
-
-
-
-
 }
