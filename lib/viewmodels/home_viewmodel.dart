@@ -1,3 +1,4 @@
+import 'package:biteback/models/product_model.dart';
 import 'package:biteback/repositories/business_repository.dart';
 import 'package:biteback/repositories/products_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,8 @@ class HomeViewModel extends ChangeNotifier {
   String _address = "Ubicación no disponible";
   List<Business> _allRestaurants = [];
   List<Business> _filteredrestaurants = [];
+  List<Product> _allProducts = [];
+  List<Product> _nearbyProducts = [];
   Set<String> _categories = {};
   String _selectedCategory = "";
 
@@ -31,12 +34,13 @@ class HomeViewModel extends ChangeNotifier {
   List<Business> get filteredRestaurants => _filteredrestaurants;
   Set<String> get categories => _categories;
   String get selectedCategory => _selectedCategory;
+  List<Product> get allProducts => _allProducts;
+  List<Product> get nearbyProducts => _nearbyProducts;
 
   // Carga los datos del usuario y su ubicación al instanciarse
-  // Carga los restaurantes al instanciarse
+  // Tambien se cargan las categorias
   HomeViewModel() {
     _loadUserData();
-    _loadRestaurants();
     _loadCategories();
   }
 
@@ -60,6 +64,18 @@ class HomeViewModel extends ChangeNotifier {
 
     // Notificar cambios a la vista
     notifyListeners();
+
+    // Carga de los restaurantes y productos
+    await Future.wait([
+      _loadRestaurants(),
+      _loadProducts(),
+    ]);
+
+    // Vincular productos a restaurantes
+    _linkProductsToRestaurants();
+
+    // Carga de productos más cercanos
+    _loadNearbyProducts();
   }
 
   // Método para obtener todos los negocios de tipo restaurante
@@ -67,6 +83,46 @@ class HomeViewModel extends ChangeNotifier {
     _allRestaurants = await _businessRepository.getRestaurants();
     _filteredrestaurants = _allRestaurants;
     notifyListeners(); 
+  }
+
+  // Método para obtener todos los productos ofertados
+  Future<void> _loadProducts() async {
+    _allProducts = await _productsRepository.getProducts();
+    notifyListeners();
+  }
+
+  // Método para linkear cada producto a su restaurante correspondeinte
+  void _linkProductsToRestaurants() {
+    for (var restaurant in _allRestaurants) {
+      restaurant.products = _allProducts.where((product) => product.businessId == restaurant.id).toList();
+    }
+    notifyListeners();
+  }
+
+  // Método para cargar los restaurantes más cercanos a la ubicación del usuario
+  void _loadNearbyProducts() {
+    if (_location == null) return;
+
+    // Distancia máxima de 5 km
+    const double maxDistance = 5000; 
+    List<Product> nearbyProducts = [];
+
+    // Se revisa que restaurantes cumplen con la cota de distancia
+    for (var restaurant in _allRestaurants) {
+      double distance = Geolocator.distanceBetween(
+        _location!.latitude, 
+        _location!.longitude, 
+        restaurant.latitude, 
+        restaurant.longitude
+      );
+
+      if (distance <= maxDistance) {
+        nearbyProducts.addAll(restaurant.products);
+      }
+    }
+
+    _nearbyProducts = nearbyProducts;
+    notifyListeners();
   }
 
   // Método para filtrar restaurantes por un nombre

@@ -3,6 +3,7 @@
 import 'package:biteback/widgets/explore_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/product_model.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/search_bar_with_voice.dart';
 import '../widgets/discount_banner.dart'; // Importa el nuevo banner
@@ -30,9 +31,7 @@ class HomeScreen extends StatelessWidget {
                 DiscountBanner(), // Aquí usamos el nuevo banner
                 ExploreBanners(),
                 _buildCategories(),
-                _buildNearbyProducts(),
-                _buildRecommendedForYou(),
-                _buildCorrientazos(),
+                _buildNearbyProducts()
               ],
             ),
           ),
@@ -105,11 +104,11 @@ Widget _categoryCard(String title, String selectedCategory, Function(String) onS
   return GestureDetector(
     onTap: () => onSelect(title),
     child: Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isSelected ? Colors.orange : Colors.white, // Fondo cambia al seleccionar
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -131,74 +130,73 @@ Widget _categoryCard(String title, String selectedCategory, Function(String) onS
 
 
   Widget _buildNearbyProducts() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Productos cercanos", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _productCard("Filete con papas", "\$25.000", "assets/filete_papas.png", 30),
-              _productCard("Gulas con cilantro", "\$15.000", "assets/gulas_cilantro.png", 20),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  return Consumer<HomeViewModel>(
+    builder: (context, viewModel, child) {
+      if (viewModel.nearbyProducts.isEmpty) {
+        return Center(child: CircularProgressIndicator()); // Muestra carga si no hay productos
+      }
 
-  Widget _productCard(String name, String price, String imagePath, int discount) {
-    return Container(
-      margin: EdgeInsets.only(right: 10),
-      width: 160,
-      child: Column(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              Image.asset(imagePath, height: 100, width: 160, fit: BoxFit.cover),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Text(
+              "Productos cercanos",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: viewModel.nearbyProducts.map((product) {
+                return _productCard(product);
+              }).toList(),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+Widget _productCard(Product product) {
+  return Container(
+    margin: EdgeInsets.only(right: 10),
+    width: 160,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          children: [
+            Image.network(product.image, height: 100, width: 160, fit: BoxFit.cover),
+            if (product.discount > 0) // Solo mostrar si hay descuento
               Positioned(
                 top: 8,
                 left: 8,
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   color: Colors.red,
-                  child: Text("${discount}% off", style: TextStyle(color: Colors.white)),
+                  child: Text(
+                    "${product.discount.toInt()}% off",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 5),
-          Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(price, style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendedForYou() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Recomendado para ti", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
-        _productCard("Magnificare", "\$25.000", "assets/magnificare.png", 35),
+          ],
+        ),
+        SizedBox(height: 5),
+        Text(product.name, style: TextStyle(fontWeight: FontWeight.bold)),
+        Text("\$${product.price.toStringAsFixed(2)}", 
+          style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
       ],
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildCorrientazos() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Corrientazos", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
-        _productCard("Bandeja paisa", "\$30.000", "assets/bandeja_paisa.png", 14),
-      ],
-    );
-  }
+
 
   Widget _buildBottomNavigationBar() {
     return Container(
