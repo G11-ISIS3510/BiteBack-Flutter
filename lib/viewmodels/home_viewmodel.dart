@@ -10,88 +10,85 @@ import '../services/location_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
 
-  // Dependencias a repositorios
+  // Inyección de repositorios para manejo de la base de datos
   final BusinessRepository _businessRepository = BusinessRepository();
   final ProductsRepository _productsRepository = ProductsRepository();
 
-  // Variables de clase con valores iniciales
+  // Variables de clase y de estado
   String _userName = "Usuario";
   UserLocation? _location;
   String _address = "Ubicación no disponible";
   List<Business> _allRestaurants = [];
-  List<Business> _filteredrestaurants = [];
   List<Product> _allProducts = [];
   List<Product> _nearbyProducts = [];
+  List<Product> _filteredProducts = [];
   Set<String> _categories = {};
   String _selectedCategory = "";
+  String _searchQuery = "";
 
-
-  // Getters para exponer los valores
+  // Getters para obtener los atributos
   String get userName => _userName;
   UserLocation? get location => _location;
   String get address => _address;
   List<Business> get allRestaurants => _allRestaurants;
-  List<Business> get filteredRestaurants => _filteredrestaurants;
   Set<String> get categories => _categories;
   String get selectedCategory => _selectedCategory;
   List<Product> get allProducts => _allProducts;
   List<Product> get nearbyProducts => _nearbyProducts;
+  List<Product> get filteredProducts => _filteredProducts; 
+  String get searchQuery => _searchQuery; 
 
-  // Carga los datos del usuario y su ubicación al instanciarse
-  // Tambien se cargan las categorias
+  // Carga de los datos del usuario y categorias
   HomeViewModel() {
     _loadUserData();
     _loadCategories();
   }
 
-  // Método para obtener el nombre y ubicación del usuario autenticado
+  // Método que carga el nombre y ubicación del usuario
+  // Támbien carga los restaurantes, productos y los asocia
   Future<void> _loadUserData() async {
-    // Obtener usuario autenticado
+
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       _userName = user.displayName ?? user.email ?? "Usuario";
     }
 
-    // Obtener la ubicación usando LocationService
+    // 
     Position? position = await LocationService.getCurrentPosition();
     if (position != null) {
       _location = UserLocation(latitude: position.latitude, longitude: position.longitude);
       _address = await LocationService.getAddressFromCoordinates(position);
-    } 
-    else {
+    } else {
       _address = "No se pudo obtener la ubicación.";
     }
 
-    // Notificar cambios a la vista
     notifyListeners();
 
-    // Carga de los restaurantes y productos
+    // Espera a la carga de los recursos
     await Future.wait([
       _loadRestaurants(),
       _loadProducts(),
     ]);
 
-    // Vincular productos a restaurantes
+    // Linkea y carga productos cercanos
     _linkProductsToRestaurants();
-
-    // Carga de productos más cercanos
     _loadNearbyProducts();
   }
 
-  // Método para obtener todos los negocios de tipo restaurante
+  // Método para cargar los restaurantes
   Future<void> _loadRestaurants() async {
     _allRestaurants = await _businessRepository.getRestaurants();
-    _filteredrestaurants = _allRestaurants;
-    notifyListeners(); 
-  }
-
-  // Método para obtener todos los productos ofertados
-  Future<void> _loadProducts() async {
-    _allProducts = await _productsRepository.getProducts();
     notifyListeners();
   }
 
-  // Método para linkear cada producto a su restaurante correspondeinte
+  // Método para cargar los productos
+  Future<void> _loadProducts() async {
+    _allProducts = await _productsRepository.getProducts();
+    _filteredProducts = _allProducts;
+    notifyListeners();
+  }
+
+  // Método para asociar productos con restaurantes
   void _linkProductsToRestaurants() {
     for (var restaurant in _allRestaurants) {
       restaurant.products = _allProducts.where((product) => product.businessId == restaurant.id).toList();
@@ -99,15 +96,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Método para cargar los restaurantes más cercanos a la ubicación del usuario
+  // Método para cargar los productos cercanos
   void _loadNearbyProducts() {
     if (_location == null) return;
 
-    // Distancia máxima de 5 km
     const double maxDistance = 5000; 
     List<Product> nearbyProducts = [];
 
-    // Se revisa que restaurantes cumplen con la cota de distancia
     for (var restaurant in _allRestaurants) {
       double distance = Geolocator.distanceBetween(
         _location!.latitude, 
@@ -125,29 +120,35 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Método para filtrar restaurantes por un nombre
-  void filterRestaurants(String query) {
-    if (query.isEmpty) {
-      _filteredrestaurants = allRestaurants;
-    } 
-    // Se ejecuta la consulta en caso de que exista
-    else {
-      _filteredrestaurants = allRestaurants.where((restaurant) {
-        return restaurant.name.toLowerCase().contains(query.toLowerCase());
-      }).toList();
-    }
-    notifyListeners();
-  }
-
-  // Método para obtener las categorias unicas de comida
+  // Método para cargar las categorias
   Future<void> _loadCategories() async {
     _categories = await _productsRepository.getUniqueCategories();
-    notifyListeners(); 
-  }
-
-  // Método para actualizar la categoría seleccionada en la vista
-  void setSelectedCategory(String category) {
-    _selectedCategory = category;
     notifyListeners();
   }
+
+  // Método para manejar la selección de categorias
+  void setSelectedCategory(String category) {
+    if (_selectedCategory == category) {
+      _selectedCategory = ""; 
+    } else {
+      _selectedCategory = category;
+    }
+    filterProducts(_searchQuery); 
+  }
+
+  // Método para hacer el filtrado de productos
+  void filterProducts(String query) {
+
+    _searchQuery = query; 
+
+    _filteredProducts = _allProducts.where((product) {
+      bool matchesQuery = query.isEmpty || product.name.toLowerCase().contains(query.toLowerCase());
+      bool matchesCategory = _selectedCategory.isEmpty || product.category == _selectedCategory;
+      return matchesQuery && matchesCategory;
+    }).toList();
+
+    notifyListeners(); 
+  }
 }
+
+
