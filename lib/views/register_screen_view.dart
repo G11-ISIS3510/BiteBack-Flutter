@@ -1,7 +1,9 @@
+// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/auth_viewmodel.dart';
-import 'login_screen.dart';
+import 'login_screen_view.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
