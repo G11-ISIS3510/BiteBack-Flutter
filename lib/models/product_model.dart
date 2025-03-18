@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Product {
 
   // Atributos que modelan un producto en la aplicación
@@ -22,4 +24,25 @@ class Product {
     required this.description,
     required this.expirationDate
   });
+
+  // Convertir documento de Firestore en un Producto
+  factory Product.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    return Product(
+      id: doc.id,
+      tag: data['tag'] ?? '',
+      name: data['name'] ?? '',
+      image: data['image'] ?? '',
+      tagImage: data['tagImage'] ?? '',
+      price: (data['price'] ?? 0).toDouble(),
+      discount: (data['discount'] ?? 0).toDouble(),
+      description: data['description'] ?? '',
+      expirationDate: (data['expirationDate'] as Timestamp).toDate(),
+    );
+  }
+
+
+
+
 }
