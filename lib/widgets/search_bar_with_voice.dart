@@ -66,7 +66,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice> {
             icon: Icon(_isListening ? Icons.mic_off : Icons.mic),
             onPressed: _isListening ? _stopListening : _startListening,
           ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
         ),
       ),
     );

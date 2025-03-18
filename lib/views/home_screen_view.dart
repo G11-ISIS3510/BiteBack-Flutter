@@ -1,9 +1,11 @@
 // ignore_for_file: use_key_in_widget_constructors, deprecated_member_use, unnecessary_brace_in_string_interps
 
+import 'package:biteback/widgets/explore_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/search_bar_with_voice.dart';
+import '../widgets/discount_banner.dart'; // Importa el nuevo banner
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -25,7 +27,8 @@ class HomeScreen extends StatelessWidget {
                         .filterRestaurants(query);
                   },
                 ),
-                _buildDiscountBanner(),
+                DiscountBanner(), // Aquí usamos el nuevo banner
+                ExploreBanners(),
                 _buildCategories(),
                 _buildNearbyProducts(),
                 _buildRecommendedForYou(),
@@ -39,9 +42,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Consumer<HomeViewModel>(
-      builder: (context, viewModel, child) {
-        return Column(
+  return Consumer<HomeViewModel>(
+    builder: (context, viewModel, child) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8), // Alineación con la barra de búsqueda
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -51,54 +56,59 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 4),
             Text(
               viewModel.address,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(fontSize: 15, color: Colors.grey),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
-  Widget _buildDiscountBanner() {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orangeAccent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        "¡Hasta un 70% de descuento!\nConsigue tu comida preferida con grandes descuentos",
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
 
-  Widget _buildCategories() {
-    return Consumer<HomeViewModel>(
-      builder: (context, viewModel, child) {
-        if (viewModel.categories.isEmpty) {
-          return Center(child: CircularProgressIndicator());
-        }
+ Widget _buildCategories() {
+  return Consumer<HomeViewModel>(
+    builder: (context, viewModel, child) {
+      if (viewModel.categories.isEmpty) {
+        return Center(child: CircularProgressIndicator());
+      }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: viewModel.categories.map((category) {
-              return _categoryCard(category);
-            }).toList(),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Text(
+              "Categorías",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
-        );
-      },
-    );
-  }
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: viewModel.categories.map((category) {
+                return _categoryCard(category, viewModel.selectedCategory, (selected) {
+                  viewModel.setSelectedCategory(selected);
+                });
+              }).toList(),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 
-  Widget _categoryCard(String title) {
-    return Container(
+Widget _categoryCard(String title, String selectedCategory, Function(String) onSelect) {
+  bool isSelected = title == selectedCategory;
+
+  return GestureDetector(
+    onTap: () => onSelect(title),
+    child: Container(
       margin: EdgeInsets.symmetric(horizontal: 8),
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isSelected ? Colors.orange : Colors.white, // Fondo cambia al seleccionar
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -110,10 +120,15 @@ class HomeScreen extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: isSelected ? Colors.white : Colors.black, // Texto cambia al seleccionar
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildNearbyProducts() {
     return Column(

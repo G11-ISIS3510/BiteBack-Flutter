@@ -20,6 +20,7 @@ class HomeViewModel extends ChangeNotifier {
   List<Business> _allRestaurants = [];
   List<Business> _filteredrestaurants = [];
   Set<String> _categories = {};
+  String _selectedCategory = "";
 
 
   // Getters para exponer los valores
@@ -29,6 +30,7 @@ class HomeViewModel extends ChangeNotifier {
   List<Business> get allRestaurants => _allRestaurants;
   List<Business> get filteredRestaurants => _filteredrestaurants;
   Set<String> get categories => _categories;
+  String get selectedCategory => _selectedCategory;
 
   // Carga los datos del usuario y su ubicación al instanciarse
   // Carga los restaurantes al instanciarse
@@ -85,5 +87,11 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> _loadCategories() async {
     _categories = await _productsRepository.getUniqueCategories();
     notifyListeners(); 
+  }
+
+  // Método para actualizar la categoría seleccionada en la vista
+  void setSelectedCategory(String category) {
+    _selectedCategory = category;
+    notifyListeners();
   }
 }
