@@ -11,10 +11,8 @@ class BusinessRepository {
 
     try {
       // Se traen todos los restaurantes que cumplan con la query
-      QuerySnapshot querySnapshot = await _db.collection('business').where('type', isEqualTo: 'restaurant').get();
-
+      QuerySnapshot querySnapshot = await _db.collection('business').where('type', isEqualTo: 'restaurante').get();
       // Modelar la entrada como un mapa para que se pueda manejar dentro de la aplicacion
-      // A futuro toca modelar los atributos que hacen falta
       return querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Business(
@@ -23,10 +21,12 @@ class BusinessRepository {
           type: data['type'], 
           latitude: (data['latitude'] as num).toDouble(), 
           longitude: (data['longitude'] as num).toDouble(), 
+          address: data['address'],
           rating: (data['rating'] as num).toDouble(), 
           image: data['image'], 
-          openHour: (data['openHour'] as num).toInt(), 
-          closeHour: (data['closeHour'] as num).toInt());
+          startHour: (data['startHour'] as num).toInt(), 
+          closeHour: (data['closeHour'] as num).toInt(),
+          products: []);
       }).toList();
     }
     catch (e) {
