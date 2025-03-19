@@ -13,7 +13,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool isRegisterMode = false;
-  bool isEmailMode = true; 
+  bool isEmailMode = true;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -32,21 +32,25 @@ class _AuthScreenState extends State<AuthScreen> {
     final authViewModel = Provider.of<AuthViewModel>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 20),
-              _buildAuthSwitcher(),
-              const SizedBox(height: 20),
-              _buildSocialButtons(authViewModel),
-              const SizedBox(height: 10),
-              _buildFormContainer(authViewModel), 
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // ✅ Centra verticalmente
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 20),
+                _buildAuthSwitcher(),
+                const SizedBox(height: 20),
+                _buildSocialButtons(authViewModel),
+                const SizedBox(height: 10),
+                _buildFormContainer(authViewModel),
+                const SizedBox(height: 50), // ✅ Espacio extra para evitar que el teclado empuje todo
+              ],
+            ),
           ),
         ),
       ),
@@ -109,62 +113,62 @@ Widget _buildSocialButtons(AuthViewModel authViewModel) {
         ],
       ),
       const SizedBox(height: 15),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () => authViewModel.loginWithGoogle(context),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/google.png', height: 20),
-                  const SizedBox(width: 5),
-                  const Text("Sign in with Google"),
-                ],
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => authViewModel.loginWithGoogle(context),
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset('assets/google.png', height: 20),
+                    const SizedBox(width: 5),
+                    const Text("Sign in with Google"),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () => setState(() => isEmailMode = !isEmailMode),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.email),
-                  const SizedBox(width: 5),
-                  Text(isEmailMode ? "Correo electrónico" : "Número de Teléfono"),
-                ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => setState(() => isEmailMode = !isEmailMode),
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.email),
+                    const SizedBox(width: 5),
+                    Text(isEmailMode ? "Correo electrónico" : "Número de Teléfono"),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 10),
-      _buildDivider(), // ✅ Añadimos la línea divisoria
-    ],
-  );
-}
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildDivider(),
+      ],
+    );
+  }
 
-Widget _buildDivider() {
-  return Row(
-    children: const [
-      Expanded(child: Divider(thickness: 1, color: Colors.grey)),
-      Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Text("o", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-      ),
-      Expanded(child: Divider(thickness: 1, color: Colors.grey)),
-    ],
-  );
-}
+  Widget _buildDivider() {
+    return Row(
+      children: const [
+        Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Text("o", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        ),
+        Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+      ],
+    );
+  }
 
   Widget _buildFormContainer(AuthViewModel authViewModel) {
     return SizedBox(
-      height: 280, // ✅ Altura fija para evitar movimientos
+      height: 280,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: isRegisterMode ? _buildRegisterForm(authViewModel) : _buildLoginForm(authViewModel),
@@ -229,8 +233,7 @@ Widget _buildDivider() {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Las contraseñas no coinciden")),
               );
-            }
-          },
+            }},
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
           child: const Text("Registrarse →", style: TextStyle(color: Colors.white, fontSize: 18)),
         ),
