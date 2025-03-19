@@ -1,4 +1,5 @@
 import 'package:biteback/models/product_model.dart';
+import 'package:biteback/repositories/analytics_repository.dart';
 import 'package:biteback/repositories/business_repository.dart';
 import 'package:biteback/repositories/products_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +14,7 @@ class HomeViewModel extends ChangeNotifier {
   // Inyección de repositorios para manejo de la base de datos
   final BusinessRepository _businessRepository = BusinessRepository();
   final ProductsRepository _productsRepository = ProductsRepository();
+  final AnalyticsRepository _analyticsRepository = AnalyticsRepository();
 
   // Variables de clase y de estado
   String _userName = "Usuario";
@@ -42,9 +44,20 @@ class HomeViewModel extends ChangeNotifier {
 
   // Carga de los datos del usuario y categorias
   HomeViewModel() {
-    _loadUserData();
-    _loadCategories();
+    _loadHomeData();
   }
+
+  Future<void> _loadHomeData() async {
+    final Stopwatch stopwatch = Stopwatch()..start(); 
+
+    await _loadUserData();
+    await _loadCategories();
+
+    stopwatch.stop(); 
+    double loadTime = stopwatch.elapsedMilliseconds / 1000.0; 
+    await _analyticsRepository.addLoadTimeHomePage(loadTime); 
+  }
+
 
   // Método que carga el nombre y ubicación del usuario
   // Támbien carga los restaurantes, productos y los asocia
