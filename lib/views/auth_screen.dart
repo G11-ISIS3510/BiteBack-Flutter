@@ -183,11 +183,13 @@ Widget _buildSocialButtons(AuthViewModel authViewModel) {
     );
   }
 
- Widget _buildFormContainer(AuthViewModel authViewModel) {
-    return Column(
-      children: [
-        isRegisterMode ? _buildRegisterForm(authViewModel) : _buildLoginForm(authViewModel),
-      ],
+Widget _buildFormContainer(AuthViewModel authViewModel) {
+    return SizedBox(
+      height: 280,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: isRegisterMode ? _buildRegisterForm(authViewModel) : _buildLoginForm(authViewModel),
+      ),
     );
   }
 
