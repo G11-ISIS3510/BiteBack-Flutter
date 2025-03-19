@@ -1,31 +1,52 @@
 // ignore_for_file: use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/restaurants_viewmodel.dart';
+import '../views/restaurants_listing_view.dart'; // Importar la nueva vista de restaurantes
 
 class ExploreBanners extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Primer banner
+        // Primer banner - Restaurantes
         Expanded(
-          child: _buildExploreCard(
-            title: "Restaurantes",
-            subtitle: "Explorar más",
-            backgroundColor: Color(0xFF0A0A15), // Fondo oscuro
-            textColor: Colors.white,
-            iconColor: Colors.orange,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChangeNotifierProvider(
+                    create: (_) => RestaurantsViewModel(),
+                    child: RestaurantsListingScreen(),
+                  ),
+                ),
+              );
+            },
+            child: _buildExploreCard(
+              title: "Restaurantes",
+              subtitle: "Explorar más",
+              backgroundColor: Color(0xFF0A0A15), // Fondo oscuro
+              textColor: Colors.white,
+              iconColor: Colors.orange,
+            ),
           ),
         ),
         SizedBox(width: 12), // Espacio fijo en la mitad
-        // Segundo banner
+        // Segundo banner - Supermercados (puedes agregar navegación si lo deseas)
         Expanded(
-          child: _buildExploreCard(
-            title: "Supermercados",
-            subtitle: "Explorar más",
-            backgroundColor: Color(0xFFDFF5D2), // Fondo verde claro
-            textColor: Colors.green[900]!,
-            iconColor: Colors.green,
+          child: GestureDetector(
+            onTap: () {
+              // Agregar navegación si creas una pantalla de supermercados
+            },
+            child: _buildExploreCard(
+              title: "Supermercados",
+              subtitle: "Explorar más",
+              backgroundColor: Color(0xFFDFF5D2), // Fondo verde claro
+              textColor: Colors.green[900]!,
+              iconColor: Colors.green,
+            ),
           ),
         ),
       ],

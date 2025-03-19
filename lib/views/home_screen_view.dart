@@ -8,7 +8,7 @@ import '../models/product_model.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/search_bar_with_voice.dart';
 import '../widgets/discount_banner.dart';
-import 'product_detail_screen.dart'; // Importa el nuevo banner
+import 'product_detail_screen.dart'; 
 
 class HomeScreen extends StatelessWidget {
   @override
