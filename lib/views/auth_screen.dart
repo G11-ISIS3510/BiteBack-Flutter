@@ -94,43 +94,74 @@ class _AuthScreenState extends State<AuthScreen> {
       ],
     );
   }
+Widget _buildSocialButtons(AuthViewModel authViewModel) {
+  return Column(
+    children: [
+      Row(
+        children: const [
+          Text("Consigue tus mejores ofertas", style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500)),
+        ],
+      ),
+      const SizedBox(height: 10), 
+      Row(
+        children: const [
+          Text("Registrarse con:", style: TextStyle(fontSize: 15)), 
+        ],
+      ),
+      const SizedBox(height: 15),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => authViewModel.loginWithGoogle(context),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/google.png', height: 20),
+                  const SizedBox(width: 5),
+                  const Text("Sign in with Google"),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => setState(() => isEmailMode = !isEmailMode),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.email),
+                  const SizedBox(width: 5),
+                  Text(isEmailMode ? "Correo electrónico" : "Número de Teléfono"),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      _buildDivider(), // ✅ Añadimos la línea divisoria
+    ],
+  );
+}
 
-  Widget _buildSocialButtons(AuthViewModel authViewModel) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () => authViewModel.loginWithGoogle(context),
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/google.png', height: 20),
-                const SizedBox(width: 5),
-                const Text("Sign In with Google"),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () => setState(() => isEmailMode = !isEmailMode), // ✅ Alternar entre Email y Teléfono
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.email),
-                const SizedBox(width: 5),
-                Text(isEmailMode ? "Correo electrónico" : "Teléfono"),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+/// ✅ Función para crear la línea divisoria con "o"
+Widget _buildDivider() {
+  return Row(
+    children: const [
+      Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Text("o", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+      ),
+      Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+    ],
+  );
+}
 
   Widget _buildFormContainer(AuthViewModel authViewModel) {
     return SizedBox(
