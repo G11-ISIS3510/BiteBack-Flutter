@@ -8,6 +8,8 @@ import 'viewmodels/auth_viewmodel.dart';
 import 'views/login_screen_view.dart';
 import 'views/home_screen_view.dart';
 import 'views/register_screen_view.dart';
+import 'views/auth_screen.dart'; 
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +44,10 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: "/",
         routes: {
-          "/": (context) => RegisterScreen(),
-          "/login": (context) => LoginScreen(),
-          "/home": (context) => HomeScreen(),
-        },
+            "/": (context) => AuthScreen(isRegister: true), 
+            "/login": (context) => AuthScreen(isRegister: false), 
+            "/home": (context) => HomeScreen(),
+          },
         themeMode: themeProvider.themeMode,
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
