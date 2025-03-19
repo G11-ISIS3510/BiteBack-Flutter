@@ -33,4 +33,29 @@ class BusinessRepository {
       return [];
     }
   } 
+
+
+  Future<Business?> getBusinessById(String businessId) async {
+    try {
+      DocumentSnapshot doc = await _db.collection('business').doc(businessId).get();
+      if (!doc.exists) return null;
+      
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return Business(
+        id: doc.id,
+        name: data['name'], 
+        type: data['type'],
+        latitude: (data['latitude'] as num).toDouble(),
+        longitude: (data['longitude'] as num).toDouble(),
+        address: data['address'],
+        rating: (data['rating'] as num).toDouble(),
+        image: data['image'],
+        startHour: (data['startHour'] as num).toInt(),
+        closeHour: (data['closeHour'] as num).toInt(),
+        products: [],
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 }

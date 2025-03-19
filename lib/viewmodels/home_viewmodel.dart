@@ -1,4 +1,5 @@
 import 'package:biteback/models/product_model.dart';
+import 'package:biteback/repositories/analytics_repository.dart';
 import 'package:biteback/repositories/business_repository.dart';
 import 'package:biteback/repositories/products_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +14,7 @@ class HomeViewModel extends ChangeNotifier {
   // Inyección de repositorios para manejo de la base de datos
   final BusinessRepository _businessRepository = BusinessRepository();
   final ProductsRepository _productsRepository = ProductsRepository();
+  final AnalyticsRepository _analyticsRepository = AnalyticsRepository();
 
   // Variables de clase y de estado
   String _userName = "Usuario";
@@ -25,6 +27,7 @@ class HomeViewModel extends ChangeNotifier {
   Set<String> _categories = {};
   String _selectedCategory = "";
   String _searchQuery = "";
+  final Map<String, String> _businessNames = {};
 
   // Getters para obtener los atributos
   String get userName => _userName;
@@ -36,13 +39,25 @@ class HomeViewModel extends ChangeNotifier {
   List<Product> get allProducts => _allProducts;
   List<Product> get nearbyProducts => _nearbyProducts;
   List<Product> get filteredProducts => _filteredProducts; 
-  String get searchQuery => _searchQuery; 
+  String get searchQuery => _searchQuery;
+  Map<String, String> get businessNames => _businessNames;
 
   // Carga de los datos del usuario y categorias
   HomeViewModel() {
-    _loadUserData();
-    _loadCategories();
+    _loadHomeData();
   }
+
+  Future<void> _loadHomeData() async {
+    final Stopwatch stopwatch = Stopwatch()..start(); 
+
+    await _loadUserData();
+    await _loadCategories();
+
+    stopwatch.stop(); 
+    double loadTime = stopwatch.elapsedMilliseconds / 1000.0; 
+    await _analyticsRepository.addLoadTimeHomePage(loadTime); 
+  }
+
 
   // Método que carga el nombre y ubicación del usuario
   // Támbien carga los restaurantes, productos y los asocia

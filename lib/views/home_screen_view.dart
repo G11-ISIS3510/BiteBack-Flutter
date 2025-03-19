@@ -5,6 +5,7 @@ import 'package:biteback/widgets/explore_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
+import '../repositories/analytics_repository.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/search_bar_with_voice.dart';
 import '../widgets/discount_banner.dart';
@@ -96,30 +97,26 @@ class HomeScreen extends StatelessWidget {
   );
 }
 
-Widget _categoryCard(String title, String selectedCategory, Function(String) onSelect) {
-  bool isSelected = title == selectedCategory;
-
+Widget _categoryCard(String category, String selectedCategory, Function(String) onSelected) {
   return GestureDetector(
-    onTap: () => onSelect(title),
+    onTap: () {
+      onSelected(category);
+      
+      // Llamar al método de AnalyticsRepository para registrar el clic
+      AnalyticsRepository().addFilterButtonsUsage(category);
+    },
     child: Container(
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(horizontal: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.orange : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: category == selectedCategory ? Colors.blue : Colors.grey[300],
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
-        title,
+        category,
         style: TextStyle(
+          color: category == selectedCategory ? Colors.white : Colors.black,
           fontWeight: FontWeight.bold,
-          color: isSelected ? Colors.white : Colors.black,
         ),
       ),
     ),
