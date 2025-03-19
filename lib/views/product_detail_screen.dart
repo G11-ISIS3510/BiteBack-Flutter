@@ -13,7 +13,7 @@ class ProductDetailScreen extends StatelessWidget {
 @override
   Widget build(BuildContext context) {
 
-  //  Corrected discount calculation
+
   final double discountedPrice = product.price - ((product.price * product.discount)/100);
 
   return ChangeNotifierProvider(
@@ -108,15 +108,15 @@ class ProductDetailScreen extends StatelessWidget {
 }
 
   Widget _buildInfoBar(Product product, String businessName, String businessDistance, BuildContext context) {
-  final theme = Theme.of(context); // ✅ Get ThemeData
+  final theme = Theme.of(context);
   final now = DateTime.now();
   final remainingTime = product.expirationDate.difference(now);
   final remainingHours = remainingTime.inHours;
-  final discountPercentage = (product.discount * 100).toStringAsFixed(0); // ✅ Convert to %
+  final discountPercentage = (product.discount * 100).toStringAsFixed(0); 
 
   final infoItems = [
     _infoCard("$remainingHours horas", "Para vencer", theme),
-    _infoCard("$discountPercentage% off", "Descuento", theme),
+    _infoCard("$discountPercentage%", "Descuento", theme),
     _infoCard(businessName, "Tienda", theme),
     _infoCard(businessDistance, "Distancia", theme),
   ];
