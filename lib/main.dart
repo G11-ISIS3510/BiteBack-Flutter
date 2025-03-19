@@ -5,11 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'viewmodels/auth_viewmodel.dart';
-import 'views/login_screen_view.dart';
 import 'views/home_screen_view.dart';
-import 'views/register_screen_view.dart';
 import 'views/auth_screen.dart'; 
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

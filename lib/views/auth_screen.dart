@@ -13,7 +13,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool isRegisterMode = false;
-  bool isEmailMode = true;
+  bool isEmailMode = true; 
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -27,34 +27,32 @@ class _AuthScreenState extends State<AuthScreen> {
     isRegisterMode = widget.isRegister;
   }
 
-@override
-Widget build(BuildContext context) {
-  final authViewModel = Provider.of<AuthViewModel>(context);
+  @override
+  Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
 
-  return Scaffold(
-    body: Center( // ✅ Centra todo el contenido
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // ✅ Centra el contenido en la pantalla
-          mainAxisSize: MainAxisSize.min, // Evita que el Column ocupe toda la pantalla
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 20),
-            _buildAuthSwitcher(),
-            const SizedBox(height: 20),
-            _buildSocialButtons(authViewModel),
-            const SizedBox(height: 10),
-            _buildFormContainer(authViewModel), // Formulario con tamaño fijo
-          ],
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 20),
+              _buildAuthSwitcher(),
+              const SizedBox(height: 20),
+              _buildSocialButtons(authViewModel),
+              const SizedBox(height: 10),
+              _buildFormContainer(authViewModel), 
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  /// ✅ 1️⃣ Encabezado con logo y título, permanece FIJO
   Widget _buildHeader() {
     return Column(
       children: [
@@ -72,7 +70,6 @@ Widget build(BuildContext context) {
     );
   }
 
-  /// ✅ 2️⃣ Selector de "Iniciar Sesión" y "Registrarse"
   Widget _buildAuthSwitcher() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -98,7 +95,6 @@ Widget build(BuildContext context) {
     );
   }
 
-  /// ✅ 3️⃣ Botones de Google y Email (Permanecen Fijos)
   Widget _buildSocialButtons(AuthViewModel authViewModel) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +108,7 @@ Widget build(BuildContext context) {
               children: [
                 Image.asset('assets/google.png', height: 20),
                 const SizedBox(width: 5),
-                const Text("Google"),
+                const Text("Sign In with Google"),
               ],
             ),
           ),
@@ -120,14 +116,14 @@ Widget build(BuildContext context) {
         const SizedBox(width: 10),
         Expanded(
           child: ElevatedButton(
-            onPressed: () => setState(() => isEmailMode = !isEmailMode),
+            onPressed: () => setState(() => isEmailMode = !isEmailMode), // ✅ Alternar entre Email y Teléfono
             style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.email),
                 const SizedBox(width: 5),
-                Text(isEmailMode ? "Correo" : "Teléfono"),
+                Text(isEmailMode ? "Correo electrónico" : "Teléfono"),
               ],
             ),
           ),
@@ -136,10 +132,9 @@ Widget build(BuildContext context) {
     );
   }
 
-  /// ✅ 4️⃣ Contenedor Fijo para el Formulario
   Widget _buildFormContainer(AuthViewModel authViewModel) {
     return SizedBox(
-      height: 240, // Se fija la altura del formulario para que no haya movimientos
+      height: 280, // ✅ Altura fija para evitar movimientos
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: isRegisterMode ? _buildRegisterForm(authViewModel) : _buildLoginForm(authViewModel),
@@ -147,18 +142,27 @@ Widget build(BuildContext context) {
     );
   }
 
-  /// 🔹 Formulario de Inicio de Sesión
   Widget _buildLoginForm(AuthViewModel authViewModel) {
     return Column(
       key: const ValueKey(1),
       children: [
-        TextField(controller: emailController, decoration: const InputDecoration(labelText: "Correo Electrónico")),
+        isEmailMode
+            ? TextField(controller: emailController, decoration: const InputDecoration(labelText: "Correo Electrónico"))
+            : TextField(controller: phoneController, decoration: const InputDecoration(labelText: "Número de Teléfono")),
+
         TextField(controller: passwordController, decoration: const InputDecoration(labelText: "Contraseña"), obscureText: true),
+
         const SizedBox(height: 20),
         ElevatedButton(
-          onPressed: () => authViewModel.loginWithEmail(emailController.text, passwordController.text, context),
+          onPressed: () {
+            if (isEmailMode) {
+              authViewModel.loginWithEmail(emailController.text, passwordController.text, context);
+            } else {
+              authViewModel.registerWithPhone(phoneController.text, context);
+            }
+          },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-          child: const Text("Iniciar sesión →", style: TextStyle(color: Colors.white, fontSize: 18)),
+          child: const Text("Continuar →", style: TextStyle(color: Colors.white, fontSize: 18)),
         ),
         const SizedBox(height: 10),
         GestureDetector(
@@ -171,19 +175,26 @@ Widget build(BuildContext context) {
     );
   }
 
-  /// 🔹 Formulario de Registro
   Widget _buildRegisterForm(AuthViewModel authViewModel) {
     return Column(
       key: const ValueKey(2),
       children: [
-        TextField(controller: emailController, decoration: const InputDecoration(labelText: "Correo Electrónico")),
+        isEmailMode
+            ? TextField(controller: emailController, decoration: const InputDecoration(labelText: "Correo Electrónico"))
+            : TextField(controller: phoneController, decoration: const InputDecoration(labelText: "Número de Teléfono")),
+
         TextField(controller: passwordController, decoration: const InputDecoration(labelText: "Contraseña"), obscureText: true),
         TextField(controller: confirmPasswordController, decoration: const InputDecoration(labelText: "Confirmar Contraseña"), obscureText: true),
+
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
             if (passwordController.text == confirmPasswordController.text) {
-              authViewModel.registerWithEmail(emailController.text, passwordController.text, context);
+              if (isEmailMode) {
+                authViewModel.registerWithEmail(emailController.text, passwordController.text, context);
+              } else {
+                authViewModel.registerWithPhone(phoneController.text, context);
+              }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Las contraseñas no coinciden")),
@@ -191,7 +202,7 @@ Widget build(BuildContext context) {
             }
           },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-          child: const Text("Crear →", style: TextStyle(color: Colors.white, fontSize: 18)),
+          child: const Text("Registrarse →", style: TextStyle(color: Colors.white, fontSize: 18)),
         ),
       ],
     );
