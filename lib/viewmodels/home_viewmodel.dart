@@ -25,6 +25,7 @@ class HomeViewModel extends ChangeNotifier {
   Set<String> _categories = {};
   String _selectedCategory = "";
   String _searchQuery = "";
+  final Map<String, String> _businessNames = {};
 
   // Getters para obtener los atributos
   String get userName => _userName;
@@ -36,7 +37,8 @@ class HomeViewModel extends ChangeNotifier {
   List<Product> get allProducts => _allProducts;
   List<Product> get nearbyProducts => _nearbyProducts;
   List<Product> get filteredProducts => _filteredProducts; 
-  String get searchQuery => _searchQuery; 
+  String get searchQuery => _searchQuery;
+  Map<String, String> get businessNames => _businessNames;
 
   // Carga de los datos del usuario y categorias
   HomeViewModel() {
