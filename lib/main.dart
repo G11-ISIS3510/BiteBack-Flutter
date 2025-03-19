@@ -13,21 +13,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Configura la barra de estado transparente con íconos oscuros
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent, // Barra de estado transparente
-    statusBarIconBrightness: Brightness.dark, // Íconos oscuros
-    systemNavigationBarColor: Colors.white, // Barra de navegación inferior blanca
-    systemNavigationBarIconBrightness: Brightness.dark, // Íconos oscuros en la barra inferior
-  ));
-
-  // Permite renderizar en toda la pnatalla
+  // Configura la barra de estado transparente con íconos dinámicos según el tema
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthViewModel()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
       ],
       child: MyApp(),
     ),
@@ -37,12 +30,11 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        // Mantiene la barra de estado transparente
-        statusBarColor: Colors.transparent, 
-        // Asegura que los iconos de la barra de estado sean oscuros
-        statusBarIconBrightness: Brightness.dark, 
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -52,11 +44,36 @@ class MyApp extends StatelessWidget {
           "/login": (context) => LoginScreen(),
           "/home": (context) => HomeScreen(),
         },
-        theme: ThemeData(
-          // Asegura fondo blanco detrás de la barra de estado
-          scaffoldBackgroundColor: Colors.white, 
-        ),
+        themeMode: themeProvider.themeMode,
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
       ),
     );
+  }
+}
+
+class ThemeProvider extends ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  ThemeProvider() {
+    _updateThemeBasedOnTime();
+  }
+
+  ThemeMode get themeMode => _themeMode;
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
+
+  void toggleTheme(bool isDark) {
+    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+
+  void _updateThemeBasedOnTime() {
+    final hour = DateTime.now().hour;
+    if (hour >= 18 || hour < 6) {
+      _themeMode = ThemeMode.dark;
+    } else {
+      _themeMode = ThemeMode.light;
+    }
+    notifyListeners();
   }
 }
