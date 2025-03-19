@@ -45,13 +45,15 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
 @override
-  Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
+Widget build(BuildContext context) {
+  final authViewModel = Provider.of<AuthViewModel>(context);
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Center(
+  return Scaffold(
+    resizeToAvoidBottomInset: true,
+    body: SafeArea(
+      child: Center(
         child: SingleChildScrollView(
+          physics: ClampingScrollPhysics(), 
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Column(
@@ -64,15 +66,18 @@ class _AuthScreenState extends State<AuthScreen> {
                 const SizedBox(height: 20),
                 _buildSocialButtons(authViewModel),
                 const SizedBox(height: 10),
-                _buildFormContainer(authViewModel),
-                const SizedBox(height: 50),
+                Flexible( 
+                  child: _buildFormContainer(authViewModel),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildHeader() {
     return Column(
@@ -184,14 +189,11 @@ Widget _buildSocialButtons(AuthViewModel authViewModel) {
   }
 
 Widget _buildFormContainer(AuthViewModel authViewModel) {
-    return SizedBox(
-      height: 280,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: isRegisterMode ? _buildRegisterForm(authViewModel) : _buildLoginForm(authViewModel),
-      ),
-    );
-  }
+  return AnimatedSwitcher(
+    duration: const Duration(milliseconds: 300),
+    child: isRegisterMode ? _buildRegisterForm(authViewModel) : _buildLoginForm(authViewModel),
+  );
+}
 
   Widget _buildLoginForm(AuthViewModel authViewModel) {
   return Column(
@@ -245,100 +247,99 @@ Widget _buildFormContainer(AuthViewModel authViewModel) {
   );
 }
 
-  Widget _buildRegisterForm(AuthViewModel authViewModel) {
-    return Column(
-      children: [
-        if (isEmailMode) ...[
-          TextField(
-            controller: emailController,
-            decoration: InputDecoration(
-              labelText: "Correo Electrónico",
-              errorText: emailError,
-            ),
-          ),
-        ] else ...[
-          TextField(
-            controller: phoneController,
-            decoration: InputDecoration(
-              labelText: "Número de Teléfono",
-              errorText: phoneError,
-            ),
-            keyboardType: TextInputType.number,
-          ),
-        ],
+Widget _buildRegisterForm(AuthViewModel authViewModel) {
+  return Column(
+    children: [
+      if (isEmailMode) ...[
         TextField(
-          controller: passwordController,
+          controller: emailController,
           decoration: InputDecoration(
-            labelText: "Contraseña",
-            errorText: passwordError,
+            labelText: "Correo Electrónico",
+            errorText: emailError,
           ),
-          obscureText: true,
         ),
+      ] else ...[
         TextField(
-          controller: confirmPasswordController,
+          controller: phoneController,
           decoration: InputDecoration(
-            labelText: "Confirmar Contraseña",
-            errorText: confirmPasswordError,
+            labelText: "Número de Teléfono",
+            errorText: phoneError,
           ),
-          obscureText: true,
+          keyboardType: TextInputType.number,
         ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-  onPressed: () {
-    setState(() {
-      emailError = null;
-      phoneError = null;
-      passwordError = null;
-      confirmPasswordError = null;
-    });
-
-    bool isValid = true;
-
-    if (isEmailMode) {
-      if (!_validateEmail(emailController.text)) {
-        setState(() {
-          emailError = "Formato de correo inválido";
-        });
-        isValid = false;
-      }
-    } else {
-      if (!_validatePhone(phoneController.text)) {
-        setState(() {
-          phoneError = "Número de teléfono inválido (mínimo 10 dígitos)";
-        });
-        isValid = false;
-      }
-    }
-
-    if (passwordController.text.length < 8) {
-      setState(() {
-        passwordError = "Debe tener al menos 8 caracteres";
-      });
-      isValid = false;
-    }
-
-    if (isRegisterMode) {
-      if (passwordController.text != confirmPasswordController.text) {
-        setState(() {
-          confirmPasswordError = "Las contraseñas no coinciden";
-        });
-        isValid = false;
-      }
-    }
-
-    if (isValid) {
-      if (isEmailMode) {
-        authViewModel.registerWithEmail(emailController.text, passwordController.text, context);
-      } else {
-        authViewModel.registerWithPhone(phoneController.text, context);
-      }
-    }
-  },
-  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-  child: const Text("Registrarse →", style: TextStyle(color: Colors.white, fontSize: 18)),
-),
-
       ],
-    );
-  }
-}
+      TextField(
+        controller: passwordController,
+        decoration: InputDecoration(
+          labelText: "Contraseña",
+          errorText: passwordError,
+        ),
+        obscureText: true,
+      ),
+      TextField(
+        controller: confirmPasswordController,
+        decoration: InputDecoration(
+          labelText: "Confirmar Contraseña",
+          errorText: confirmPasswordError,
+        ),
+        obscureText: true,
+      ),
+      const SizedBox(height: 10),
+
+      ElevatedButton(
+        onPressed: () {
+          setState(() {
+            emailError = null;
+            phoneError = null;
+            passwordError = null;
+            confirmPasswordError = null;
+          });
+
+          bool isValid = true;
+
+          if (isEmailMode) {
+            if (!_validateEmail(emailController.text)) {
+              setState(() {
+                emailError = "Formato de correo inválido";
+              });
+              isValid = false;
+            }
+          } else {
+            if (!_validatePhone(phoneController.text)) {
+              setState(() {
+                phoneError = "Número de teléfono inválido (mínimo 10 dígitos)";
+              });
+              isValid = false;
+            }
+          }
+
+          if (passwordController.text.length < 8) {
+            setState(() {
+              passwordError = "Debe tener al menos 8 caracteres";
+            });
+            isValid = false;
+          }
+
+          if (isRegisterMode) {
+            if (passwordController.text != confirmPasswordController.text) {
+              setState(() {
+                confirmPasswordError = "Las contraseñas no coinciden";
+              });
+              isValid = false;
+            }
+          }
+
+          if (isValid) {
+            if (isEmailMode) {
+              authViewModel.registerWithEmail(emailController.text, passwordController.text, context);
+            } else {
+              authViewModel.registerWithPhone(phoneController.text, context);
+            }
+          }
+        },
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+        child: const Text("Registrarse →", style: TextStyle(color: Colors.white, fontSize: 18)),
+      ),
+    ],
+  );
+}}
