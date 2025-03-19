@@ -13,7 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Configura la barra de estado transparente con íconos dinámicos según el tema
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(
@@ -40,7 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        navigatorKey: NavigationService().navigatorKey, // ✅ Usamos nuestro singleton
+        navigatorKey: NavigationService().navigatorKey, 
         initialRoute: "/",
         routes: {
           "/": (context) => AuthScreen(isRegister: true),
