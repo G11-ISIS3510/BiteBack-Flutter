@@ -1,3 +1,4 @@
+import 'package:biteback/repositories/analytics_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/product_model.dart';
@@ -5,43 +6,66 @@ import '../models/business_model.dart';
 import '../repositories/business_repository.dart';
 
 class ProductDetailViewModel extends ChangeNotifier {
+  // Dependencias para el manejo de datos
   final BusinessRepository _businessRepository = BusinessRepository();
+  final AnalyticsRepository _analyticsRepository = AnalyticsRepository();
 
   String _businessName = "Cargando...";
   String _businessDistance = "Cargando...";
+  Position? _userLocation; // Guarda la ubicación del usuario
 
   String get businessName => _businessName;
   String get businessDistance => _businessDistance;
 
-  // Fetch Business Details (Name + Distance)
-  Future<void> fetchBusinessDetails(Product product, Position userLocation) async {
-    await _fetchBusinessName(product.businessId);
-    await _fetchBusinessDistance(product.businessId, userLocation);
+  // Inicialización del ViewModel (llamar en initState)
+  Future<void> init(Product product) async {
+    await _getUserLocation();
+    if (_userLocation != null) {
+      await fetchBusinessDetails(product);
+    }
   }
 
-  // Fetch Business Name
+  // Obtiene la ubicación del usuario solo una vez
+  Future<void> _getUserLocation() async {
+    try {
+      _userLocation = await Geolocator.getCurrentPosition();
+    } catch (e) {
+      _businessDistance = "Ubicación no disponible";
+    }
+  }
+
+  // Obtiene los detalles del negocio (nombre + distancia)
+  Future<void> fetchBusinessDetails(Product product) async {
+    await _fetchBusinessName(product.businessId);
+    if (_userLocation != null) {
+      await _fetchBusinessDistance(product.businessId);
+    }
+    // Registrar interacción en analítica
+    _analyticsRepository.addClickInteractionProduct(product.category, product.name);
+  }
+
+  // Obtiene el nombre del negocio
   Future<void> _fetchBusinessName(String businessId) async {
     Business? business = await _businessRepository.getBusinessById(businessId);
     _businessName = business?.name ?? "No disponible";
     notifyListeners();
   }
 
-  // Fetch Business Distance
-  Future<void> _fetchBusinessDistance(String businessId, Position userLocation) async {
+  // Calcula la distancia del usuario al negocio
+  Future<void> _fetchBusinessDistance(String businessId) async {
     Business? business = await _businessRepository.getBusinessById(businessId);
-    if (business != null) {
+    if (business != null && _userLocation != null) {
       double distance = Geolocator.distanceBetween(
-        userLocation.latitude,
-        userLocation.longitude,
+        _userLocation!.latitude,
+        _userLocation!.longitude,
         business.latitude,
         business.longitude,
-      ) / 1000; // Convert meters to km
+      ) / 1000; // Convertir metros a km
 
       _businessDistance = "${distance.toStringAsFixed(1)} km";
     } else {
       _businessDistance = "No disponible";
     }
-
     notifyListeners();
   }
 }

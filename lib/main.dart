@@ -1,19 +1,18 @@
-// ignore_for_file: use_key_in_widget_constructors
-
+import 'package:biteback/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'viewmodels/auth_viewmodel.dart';
-import 'views/login_screen_view.dart';
 import 'views/home_screen_view.dart';
-import 'views/register_screen_view.dart';
+import 'views/auth_screen.dart';
+import 'services/navigation_service.dart';
+import 'views/product_detail_screen.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Configura la barra de estado transparente con íconos dinámicos según el tema
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(
@@ -40,11 +39,13 @@ class MyApp extends StatelessWidget {
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        navigatorKey: NavigationService().navigatorKey, 
         initialRoute: "/",
         routes: {
-          "/": (context) => RegisterScreen(),
-          "/login": (context) => LoginScreen(),
+          "/": (context) => AuthScreen(isRegister: true),
+          "/login": (context) => AuthScreen(isRegister: false),
           "/home": (context) => HomeScreen(),
+          "/productDetail": (context) => ProductDetailScreen(product: ModalRoute.of(context)!.settings.arguments as Product),
         },
         themeMode: themeProvider.themeMode,
         theme: ThemeData.light(),

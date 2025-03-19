@@ -19,10 +19,30 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(() {
-      Provider.of<HomeViewModel>(context, listen: false)
-          .filterProducts(_searchController.text);
-    });
+    _searchController.addListener(_resetSearchIfEmpty);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_resetSearchIfEmpty);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Restablece la búsqueda si el campo está vacío
+  void _resetSearchIfEmpty() {
+    if (_searchController.text.isEmpty) {
+      Provider.of<HomeViewModel>(context, listen: false).resetProducts();
+    }
+  }
+
+  void _performSearch() {
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      Provider.of<HomeViewModel>(context, listen: false).filterProducts(query);
+    } else {
+      Provider.of<HomeViewModel>(context, listen: false).resetProducts();
+    }
   }
 
   void _startListening() async {
@@ -36,7 +56,14 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice> {
             setState(() {
               _searchController.text = result.recognizedWords;
             });
+
+            // Ejecutar búsqueda al finalizar el reconocimiento
+            if (result.finalResult) {
+              _stopListening();
+              _performSearch();
+            }
           },
+          listenFor: Duration(seconds: 5),
         );
       } else {
         _showPermissionError("Error al inicializar el reconocimiento de voz.");
@@ -72,6 +99,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice> {
           ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
         ),
+        onSubmitted: (value) => _performSearch(),
       ),
     );
   }
