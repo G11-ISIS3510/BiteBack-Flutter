@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import '../main.dart';
 import '../models/product_model.dart';
 import '../viewmodels/product_detail_viewmodel.dart';
-import 'package:intl/intl.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
@@ -14,10 +12,8 @@ class ProductDetailScreen extends StatelessWidget {
   
 @override
 Widget build(BuildContext context) {
-  final themeProvider = Provider.of<ThemeProvider>(context);
-  final isDarkMode = themeProvider.isDarkMode;
 
-  // ✅ Corrected discount calculation
+  //  Corrected discount calculation
   final double discountedPrice = product.price - ((product.price * product.discount)/100);
 
   return ChangeNotifierProvider(
@@ -35,7 +31,7 @@ Widget build(BuildContext context) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ✅ Product Image
+                // Product Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
@@ -47,15 +43,15 @@ Widget build(BuildContext context) {
                 ),
                 const SizedBox(height: 10),
 
-                // ✅ Product Name
+                // Product Name
                 Text(product.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 5),
 
-                // ✅ Corrected Price and Discount Display
+                // Price and Discount Display
                 Row(
                   children: [
                     Text(
-                      "\$${discountedPrice.toStringAsFixed(2)}", // 🔹 Corrected Calculation
+                      "\$${discountedPrice.toStringAsFixed(2)}", 
                       style: const TextStyle(fontSize: 20, color: Colors.orange, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 10),
@@ -68,7 +64,7 @@ Widget build(BuildContext context) {
 
                 const SizedBox(height: 10),
 
-                // ✅ Updated Info Bar
+                //  Updated Info Bar
                 _buildInfoBar(product, viewModel.businessName, viewModel.businessDistance, context),
 
                 const SizedBox(height: 20),
@@ -85,12 +81,12 @@ Widget build(BuildContext context) {
 
                 const SizedBox(height: 10),
 
-                // ✅ Product Description
+                //  Product Description
                 Text(product.description, style: const TextStyle(fontSize: 16)),
 
                 const SizedBox(height: 20),
 
-                // ✅ Purchase Button
+                //  Purchase Button
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -112,21 +108,21 @@ Widget build(BuildContext context) {
 }
 
   Widget _buildInfoBar(Product product, String businessName, String businessDistance, BuildContext context) {
-  final theme = Theme.of(context); // ✅ Get ThemeData
+  final theme = Theme.of(context); //  Get ThemeData
   
   final now = DateTime.now();
   final remainingTime = product.expirationDate.difference(now);
   final remainingHours = remainingTime.inHours;
-  final discountPercentage = (product.discount).toStringAsFixed(0); // ✅ Convert to %
+  final discountPercentage = (product.discount).toStringAsFixed(0); 
 
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
     decoration: BoxDecoration(
-      color: theme.brightness == Brightness.dark ? Colors.black87 : Colors.white, // ✅ Automatic light/dark mode
+      color: theme.brightness == Brightness.dark ? Colors.black87 : Colors.white, 
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.1),
+          color: Colors.black.withAlpha(25),
           blurRadius: 5,
           offset: const Offset(0, 2),
         ),
@@ -144,7 +140,7 @@ Widget build(BuildContext context) {
   );
 }
 
-// ✅ _infoCard() Uses Theme Colors Without Changing `main.dart`
+//  _infoCard() Uses Theme Colors Without Changing `main.dart`
 Widget _infoCard(String value, String label, ThemeData theme) {
   final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -155,14 +151,14 @@ Widget _infoCard(String value, String label, ThemeData theme) {
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: isDarkMode ? Colors.white : Colors.black, // ✅ Text adapts automatically
+          color: isDarkMode ? Colors.white : Colors.black, 
         ),
       ),
       Text(
         label,
         style: TextStyle(
           fontSize: 12,
-          color: isDarkMode ? Colors.grey[300] : Colors.grey[700], // ✅ Subtitle adapts to theme
+          color: isDarkMode ? Colors.grey[300] : Colors.grey[700], 
         ),
       ),
     ],
