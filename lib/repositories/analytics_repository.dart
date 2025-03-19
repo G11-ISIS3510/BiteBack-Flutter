@@ -31,4 +31,31 @@ class AnalyticsRepository {
       return;
     }
   }
+
+  // Método encargado de añadir una interacción con los productos listados
+  Future<void> addClickInteractionProduct(String category, String name) async {
+    try{
+      await _db.collection('click_interaction').add({
+        'category-products-name': category,
+        'products-name': name,
+        'timestamp': FieldValue.serverTimestamp()
+      });
+    }
+    catch(e){
+      return;
+    }
+  }
+
+  // Método encargado de añadir una búsqueda realizada
+  Future<void> addSearch(String query) async {
+    try{
+      await _db.collection('searches').add({
+        'text': query,
+        'timestamp': FieldValue.serverTimestamp()
+      });
+    }
+    catch(e){
+      return;
+    }
+  }
 }

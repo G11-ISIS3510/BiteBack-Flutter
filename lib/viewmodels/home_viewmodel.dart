@@ -153,7 +153,8 @@ class HomeViewModel extends ChangeNotifier {
 
   // Método para hacer el filtrado de productos
   void filterProducts(String query) {
-
+    // Actualizando la analítica
+    _analyticsRepository.addSearch(query);
     _searchQuery = query; 
 
     _filteredProducts = _allProducts.where((product) {
@@ -163,6 +164,12 @@ class HomeViewModel extends ChangeNotifier {
     }).toList();
 
     notifyListeners(); 
+  }
+
+  // Método para resetear la lista de productos filtrados
+  void resetProducts() {
+    _filteredProducts = List.from(_allProducts);
+    notifyListeners();
   }
 }
 
