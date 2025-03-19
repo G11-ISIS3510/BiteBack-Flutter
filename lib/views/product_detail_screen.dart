@@ -11,9 +11,9 @@ class ProductDetailScreen extends StatelessWidget {
 
   
 @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
 
-  //  Corrected discount calculation
+
   final double discountedPrice = product.price - ((product.price * product.discount)/100);
 
   return ChangeNotifierProvider(
@@ -108,62 +108,97 @@ Widget build(BuildContext context) {
 }
 
   Widget _buildInfoBar(Product product, String businessName, String businessDistance, BuildContext context) {
-  final theme = Theme.of(context); //  Get ThemeData
-  
+  final theme = Theme.of(context);
   final now = DateTime.now();
   final remainingTime = product.expirationDate.difference(now);
   final remainingHours = remainingTime.inHours;
-  final discountPercentage = (product.discount).toStringAsFixed(0); 
+  final discountPercentage = (product.discount * 100).toStringAsFixed(0); 
 
-  return Container(
-    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-    decoration: BoxDecoration(
-      color: theme.brightness == Brightness.dark ? Colors.black87 : Colors.white, 
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha(25),
-          blurRadius: 5,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  final infoItems = [
+    _infoCard("$remainingHours horas", "Para vencer", theme),
+    _infoCard("$discountPercentage%", "Descuento", theme),
+    _infoCard(businessName, "Tienda", theme),
+    _infoCard(businessDistance, "Distancia", theme),
+  ];
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (constraints.maxWidth > 400) { 
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: theme.brightness == Brightness.dark ? Colors.black87 : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(25),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: infoItems,
+          ),
+        );
+      } else { 
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: theme.brightness == Brightness.dark ? Colors.black87 : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(25),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [infoItems[0], infoItems[1]], 
+              ),
+              const SizedBox(height: 10), 
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [infoItems[2], infoItems[3]], 
+              ),
+            ],
+          ),
+        );
+      }
+    },
+  );
+}
+
+
+  Widget _infoCard(String value, String label, ThemeData theme) {
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Column(
       children: [
-        _infoCard("$remainingHours horas", "Para vencer", theme),
-        _infoCard("$discountPercentage%", "Descuento", theme),
-        _infoCard(businessName, "Tienda", theme),
-        _infoCard(businessDistance, "Distancia", theme),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black, 
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDarkMode ? Colors.grey[300] : Colors.grey[700], 
+          ),
+        ),
       ],
-    ),
-  );
-}
-
-//  _infoCard() Uses Theme Colors Without Changing `main.dart`
-Widget _infoCard(String value, String label, ThemeData theme) {
-  final isDarkMode = theme.brightness == Brightness.dark;
-
-  return Column(
-    children: [
-      Text(
-        value,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: isDarkMode ? Colors.white : Colors.black, 
-        ),
-      ),
-      Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          color: isDarkMode ? Colors.grey[300] : Colors.grey[700], 
-        ),
-      ),
-    ],
-  );
-}
+    );
+  }
 
 
 
