@@ -52,4 +52,20 @@ class RestaurantsViewModel extends ChangeNotifier {
       _weeklyRatings[restaurant.name] = rating;
     }
   }
+
+  // Método que ordena por calificación general
+  void sortByGeneralRating() {
+    _restaurants.sort((a, b) => b.rating.compareTo(a.rating));
+    notifyListeners();
+  }
+
+  // Método que ordena por calificación semanal
+  void sortByWeeklyRating() {
+    _restaurants.sort((a, b) {
+      double ratingA = _weeklyRatings[a.name] ?? 0.0;
+      double ratingB = _weeklyRatings[b.name] ?? 0.0;
+      return ratingB.compareTo(ratingA);
+    });
+    notifyListeners();
+  }
 }
