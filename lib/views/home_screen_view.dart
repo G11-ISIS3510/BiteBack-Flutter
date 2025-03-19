@@ -1,5 +1,6 @@
 // ignore_for_file: use_key_in_widget_constructors, deprecated_member_use, unnecessary_brace_in_string_interps
 
+import 'package:biteback/services/navigation_service.dart';
 import 'package:biteback/widgets/custom_bottom_navbar.dart';
 import 'package:biteback/widgets/explore_banner.dart';
 import 'package:flutter/material.dart';
@@ -194,13 +195,8 @@ Widget _buildAllProducts() {
 
 Widget _productCard(Product product, BuildContext context) {
   return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProductDetailScreen(product: product),
-        ),
-      );
+        onTap: () {
+      NavigationService().navigateTo('/productDetail', arguments: product);
     },
     child: ClipRRect(
       borderRadius: BorderRadius.circular(20),

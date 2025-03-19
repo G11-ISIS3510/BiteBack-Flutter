@@ -149,7 +149,6 @@ Widget _buildSocialButtons(AuthViewModel authViewModel) {
   );
 }
 
-/// ✅ Función para crear la línea divisoria con "o"
 Widget _buildDivider() {
   return Row(
     children: const [
