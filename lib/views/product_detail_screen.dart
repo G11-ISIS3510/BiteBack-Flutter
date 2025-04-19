@@ -26,14 +26,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double discountedPrice =
-        widget.product.price - ((widget.product.price * widget.product.discount) / 100);
+  final double discountedPrice =
+      widget.product.price - ((widget.product.price * widget.product.discount) / 100);
 
-    return ChangeNotifierProvider(
-      create: (_) => viewModel,
-      child: Scaffold(
-        appBar: AppBar(title: Text(widget.product.name)),
-        body: Consumer<ProductDetailViewModel>(
+  return ChangeNotifierProvider(
+    create: (_) => viewModel,
+    child: Scaffold(
+      appBar: AppBar(title: Text(widget.product.name)),
+      body: SafeArea( 
+        child: Consumer<ProductDetailViewModel>(
           builder: (context, viewModel, child) {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -117,8 +118,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildInfoBar(Product product, String businessName, String businessDistance, BuildContext context) {
     final theme = Theme.of(context);

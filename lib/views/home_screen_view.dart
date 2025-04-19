@@ -29,7 +29,8 @@ class HomeScreen extends StatelessWidget {
                 DiscountBanner(),
                 ExploreBanners(),
                 _buildCategories(),
-                _buildAllProducts(), // Nueva función que ahora maneja la búsqueda
+                _buildAllProducts(), 
+                _buildRecentSearches(),
                 _buildNearbyProducts(),
               ],
             ),
@@ -128,30 +129,61 @@ Widget _categoryCard(String category, String selectedCategory, Function(String) 
   return Consumer<HomeViewModel>(
     builder: (context, viewModel, child) {
       if (viewModel.nearbyProducts.isEmpty) {
-        return Center(child: CircularProgressIndicator()); // Muestra carga si no hay productos
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Text(
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               "Productos cercanos",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ),
-          SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: viewModel.nearbyProducts.map((product) {
-                return _productCard(product, context);
-              }).toList(),
+            const SizedBox(height: 16),
+            Center(
+              child: Column(
+                children: [
+                  Icon(Icons.search_off, size: 48, color: Colors.grey),
+                  const SizedBox(height: 12),
+                  Text(
+                    "No hay productos cercanos",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Intenta moverte a otra zona o vuelve a intentarlo más tarde.",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Text(
+            "Productos cercanos",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: viewModel.nearbyProducts.map((product) {
+              return _productCard(product, context);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
     },
   );
 }
@@ -191,6 +223,51 @@ Widget _buildAllProducts() {
     },
   );
 }
+
+Widget _buildRecentSearches() {
+  return Consumer<HomeViewModel>(
+    builder: (context, viewModel, child) {
+      if (viewModel.recentSearchResults.isEmpty) {
+        return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Búsquedas Recientes",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: Icon(Icons.clear_all, color: Colors.red),
+                  onPressed: () {
+                    // Llamar al método para borrar las búsquedas recientes
+                    viewModel.clearRecentSearches();
+                  },
+                ),
+              ],
+            ),
+        ),
+        SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: viewModel.recentSearchResults.map((product) {
+              return _productCard(product, context);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+    },
+  );
+}
+
 
 Widget _productCard(Product product, BuildContext context) {
   return GestureDetector(
