@@ -1,6 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, deprecated_member_use, unnecessary_brace_in_string_interps
 
 import 'package:biteback/services/navigation_service.dart';
+import 'package:biteback/viewmodels/auth_viewmodel.dart';
 import 'package:biteback/widgets/custom_bottom_navbar.dart';
 import 'package:biteback/widgets/explore_banner.dart';
 import 'package:flutter/material.dart';
@@ -41,20 +42,37 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-  return Consumer<HomeViewModel>(
-    builder: (context, viewModel, child) {
+  return Consumer2<HomeViewModel, AuthViewModel>(
+    builder: (context, homeViewModel, authViewModel, child) {
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8), // Alineación con la barra de búsqueda
+        padding: EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Hola, ${viewModel.userName}!",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Hola, ${homeViewModel.userName}!",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.logout, color: Colors.red),
+                  tooltip: "Cerrar sesión",
+                  onPressed: () async {
+                    await authViewModel.logout();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, "/login");
+                    }
+                  },
+                ),
+              ],
             ),
             SizedBox(height: 4),
             Text(
-              viewModel.address,
+              homeViewModel.address,
               style: TextStyle(fontSize: 15, color: Colors.grey),
             ),
           ],
