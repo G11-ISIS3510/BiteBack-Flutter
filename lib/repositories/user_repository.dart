@@ -17,10 +17,10 @@ class UserRepository {
 
   if (Platform.isAndroid) {
     final androidInfo = await deviceInfo.androidInfo;
-    deviceModel = androidInfo.model ?? "Unknown Android";
+    deviceModel = androidInfo.model;
   } else if (Platform.isIOS) {
     final iosInfo = await deviceInfo.iosInfo;
-    deviceModel = iosInfo.utsname.machine ?? "Unknown iOS";
+    deviceModel = iosInfo.utsname.machine;
   }
 
   final userModel = UserModel(
