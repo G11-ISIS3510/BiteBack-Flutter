@@ -3,6 +3,7 @@ import '../models/cart_item_model.dart';
 import '../repositories/cart_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/custom_bottom_navbar.dart';
+import 'payment_mock_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -15,10 +16,12 @@ class _CartScreenState extends State<CartScreen> {
   final CartRepository _cartRepository = CartRepository();
   List<CartItem> _cartItems = [];
   bool _loading = true;
+  double? _sessionStartTime;
 
   @override
   void initState() {
     super.initState();
+    _sessionStartTime = DateTime.now().millisecondsSinceEpoch.toDouble();
     _fetchCart();
   }
 
@@ -52,6 +55,26 @@ class _CartScreenState extends State<CartScreen> {
     return _cartItems.fold(0.0, (total, item) => total + item.finalPrice * item.quantity);
   }
 
+  Future<void> _finalizePurchase() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || _sessionStartTime == null) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch.toDouble();
+    final sessionDuration = now - _sessionStartTime!;
+
+    await _cartRepository.logCheckoutSession(uid, sessionDuration, _calculateTotal(), _cartItems);
+    await _cartRepository.clearCart(uid);
+  }
+
+  void _handleMockPayment() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PaymentMockScreen(onPaymentComplete: _finalizePurchase),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +86,28 @@ class _CartScreenState extends State<CartScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _cartItems.isEmpty
-              ? const Center(child: Text("Tu carrito está vacío."))
+              ? Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Tu carrito está vacío.",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          child: const Text("Agregar algunos productos",
+              style: TextStyle(color: Colors.white, fontSize: 16)),
+        ),
+      ],
+    ),
+  )
+
               : Column(
                   children: [
                     Expanded(
@@ -159,9 +203,7 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                           const SizedBox(height: 10),
                           ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/payment');
-                            },
+                            onPressed: _handleMockPayment,
                             icon: const Icon(Icons.payment, color: Colors.white),
                             label: const Text("Pagar ahora →", style: TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(

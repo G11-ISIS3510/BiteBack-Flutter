@@ -56,8 +56,7 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(builder: (_) => HomeScreen());
             case '/cart':
               return MaterialPageRoute(builder: (_) => const CartScreen());
-            case '/payment':
-              return MaterialPageRoute(builder: (_) => const PaymentMockScreen());
+            
             case '/productDetail':
               final product = settings.arguments as Product;
               return MaterialPageRoute(
