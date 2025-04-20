@@ -2,30 +2,46 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../repositories/user_repository.dart';
+
 import 'dart:io';
 
 class AuthService {
 
+  final UserRepository _userRepository = UserRepository();
+
   // Instancia de firebase para manejar lo relacionado con autenticación
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Método para manejar el registro con email y contraseña
   Future<String?> registerWithEmail(String email, String password) async {
-    try {
-      // Se crea la credencial en la base de autenticacion usando la informacion del usuario
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      return null; // No error
-    } 
-    on SocketException {
-      return "No hay conexión a internet. Intenta nuevamente más tarde.";
+  try {
+    // 1. Crear la credencial
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    // 2. Obtener el usuario
+    final user = userCredential.user;
+
+    // 3. Guardar en Firestore
+    if (user != null) {
+      await _userRepository.createUserDocumentIfNotExists(user);
     }
-    on FirebaseAuthException catch (e) {
-      return _parseFirebaseError(e);
-    }
-    catch (e) {
-      return "No hay conexión a internet. Intenta nuevamente más tarde.";
-    }
+
+    return null; // No error
+  } 
+  on SocketException {
+    return "No hay conexión a internet. Intenta nuevamente más tarde.";
   }
+  on FirebaseAuthException catch (e) {
+    return _parseFirebaseError(e);
+  }
+  catch (e) {
+    return "No hay conexión a internet. Intenta nuevamente más tarde.";
+  }
+}
+
 
   // Método para manejar el inicio de sesión con email y contraseña
   Future<String?> loginWithEmail(String email, String password) async {
@@ -45,30 +61,37 @@ class AuthService {
     }
   }
 
-  // Método para iniciar sesión con la cuenta de google
   Future<String?> signInWithGoogle() async {
-    try {
-      // Se verifica la autenticacion haciendo uso de los servicios de google
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+  try {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
 
-      // Se genera la credencial 
-      final AuthCredential credential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-      // Se utiliza el servicio de firebase y las credenciales
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
-      return null; // No error
-    } 
-    on SocketException {
-      return "No hay conexión a internet. Intenta nuevamente más tarde.";
+    UserCredential userCredential = await _auth.signInWithCredential(credential);
+    final user = userCredential.user;
+
+    if (user != null) {
+      await _userRepository.createUserDocumentIfNotExists(user);
     }
-    on FirebaseAuthException catch (e) {
-      return _parseFirebaseError(e);
-    }
-    catch (e) {
-      return "No hay conexión a internet. Intenta nuevamente más tarde.";
-    }
+
+    return null;
+  } 
+  on SocketException {
+    return "No hay conexión a internet. Intenta nuevamente más tarde.";
   }
+  on FirebaseAuthException catch (e) {
+    return _parseFirebaseError(e);
+  }
+  catch (e) {
+    return "No hay conexión a internet. Intenta nuevamente más tarde.";
+  }
+}
+
+
 
   // Método para registrar con teléfono y código
   Future<String?> registerWithPhone(String phoneNumber, Function(String) codeSentCallback, Function(String) errorCallback) async {
