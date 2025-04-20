@@ -1,5 +1,7 @@
 // ignore_for_file: unnecessary_string_interpolations, library_private_types_in_public_api, use_key_in_widget_constructors
 
+import 'package:biteback/cache/custom_image_cache_manager.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/restaurants_viewmodel.dart';
@@ -60,10 +62,33 @@ class _RestaurantsListingScreenState extends State<RestaurantsListingScreen> {
                     child: Row(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            bottomLeft: Radius.circular(20),
+                          ),
                           child: restaurant.image.isNotEmpty
-                              ? Image.network(restaurant.image, width: 120, height: 120, fit: BoxFit.cover)
-                              : Container(width: 120, height: 120, color: Colors.grey[300]),
+                              ? CachedNetworkImage(
+                                  imageUrl: restaurant.image,
+                                  cacheManager: CustomImageCacheManager.instance,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const SizedBox(
+                                    width: 120,
+                                    height: 120,
+                                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                  ),
+                                  errorWidget: (context, url, error) => const SizedBox(
+                                    width: 120,
+                                    height: 120,
+                                    child: Center(child: Icon(Icons.broken_image)),
+                                  ),
+                                )
+                              : Container(
+                                  width: 120,
+                                  height: 120,
+                                  color: Colors.grey[300],
+                                ),
                         ),
                         SizedBox(width: 10),
                         Expanded(

@@ -1,5 +1,7 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
+import 'package:biteback/cache/custom_image_cache_manager.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
@@ -44,11 +46,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Product Image
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      widget.product.image,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.product.image,
+                      cacheManager: CustomImageCacheManager.instance,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => const SizedBox(
+                        height: 200,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      ),
+                      errorWidget: (context, url, error) => const SizedBox(
+                        height: 200,
+                        child: Center(child: Icon(Icons.broken_image)),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),

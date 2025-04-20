@@ -1,9 +1,11 @@
 // ignore_for_file: use_key_in_widget_constructors, deprecated_member_use, unnecessary_brace_in_string_interps
 
+import 'package:biteback/cache/custom_image_cache_manager.dart';
 import 'package:biteback/services/navigation_service.dart';
 import 'package:biteback/viewmodels/auth_viewmodel.dart';
 import 'package:biteback/widgets/custom_bottom_navbar.dart';
 import 'package:biteback/widgets/explore_banner.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
@@ -308,7 +310,23 @@ Widget _productCard(Product product, BuildContext context) {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  child: Image.network(product.image, height: 100, width: 160, fit: BoxFit.cover),
+                  child: CachedNetworkImage(
+                    imageUrl: product.image,
+                    cacheManager: CustomImageCacheManager.instance,
+                    height: 100,
+                    width: 160,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const SizedBox(
+                      height: 100,
+                      width: 160,
+                      child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                    errorWidget: (context, url, error) => const SizedBox(
+                      height: 100,
+                      width: 160,
+                      child: Center(child: Icon(Icons.broken_image)),
+                    ),
+                  ),
                 ),
                 if (product.discount > 0)
                   Positioned(
