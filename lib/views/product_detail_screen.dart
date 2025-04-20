@@ -1,7 +1,9 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
 import 'package:biteback/cache/custom_image_cache_manager.dart';
+import 'package:biteback/repositories/cart_repository.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
@@ -112,17 +114,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Purchase Button
                   ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Center(
-                      child: Text("Me lo merco →",
-                          style: TextStyle(fontSize: 18, color: Colors.white)),
+                  onPressed: () async {
+                    final uid = FirebaseAuth.instance.currentUser?.uid;
+                    if (uid != null) {
+                      final cartRepository = CartRepository();
+                      await cartRepository.addToCart(uid, widget.product);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Producto agregado al carrito")),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Me lo merco →",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
+                ),
                 ],
               ),
             );
