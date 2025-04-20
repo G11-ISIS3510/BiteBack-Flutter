@@ -49,7 +49,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   double _calculateTotal() {
-    return _cartItems.fold(0.0, (total, item) => total + item.price * item.quantity);
+    return _cartItems.fold(0.0, (total, item) => total + item.finalPrice * item.quantity);
   }
 
   @override
@@ -91,7 +91,24 @@ class _CartScreenState extends State<CartScreen> {
                                       children: [
                                         Text(item.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 4),
-                                        Text("${item.price.toStringAsFixed(0)}", style: const TextStyle(color: Colors.orange)),
+                                        Text("${item.discount.toInt()}% DCTO", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "\$${item.finalPrice.toStringAsFixed(0)}",
+                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "\$${item.price.toStringAsFixed(0)}",
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                                decoration: TextDecoration.lineThrough,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                         const SizedBox(height: 8),
                                         Row(
                                           children: [
@@ -142,17 +159,16 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                           const SizedBox(height: 10),
                           ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/payment');
-                          },
-                          icon: const Icon(Icons.payment, color: Colors.white),
-                          label: const Text("Pagar ahora →", style: TextStyle(color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/payment');
+                            },
+                            icon: const Icon(Icons.payment, color: Colors.white),
+                            label: const Text("Pagar ahora →", style: TextStyle(color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
                           ),
-                        ),
-
                         ],
                       ),
                     ),
