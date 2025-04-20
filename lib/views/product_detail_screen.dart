@@ -1,5 +1,9 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
+import 'package:biteback/cache/custom_image_cache_manager.dart';
+import 'package:biteback/repositories/cart_repository.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
@@ -26,14 +30,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double discountedPrice =
-        widget.product.price - ((widget.product.price * widget.product.discount) / 100);
+  final double discountedPrice =
+      widget.product.price - ((widget.product.price * widget.product.discount) / 100);
 
-    return ChangeNotifierProvider(
-      create: (_) => viewModel,
-      child: Scaffold(
-        appBar: AppBar(title: Text(widget.product.name)),
-        body: Consumer<ProductDetailViewModel>(
+  return ChangeNotifierProvider(
+    create: (_) => viewModel,
+    child: Scaffold(
+      appBar: AppBar(title: Text(widget.product.name)),
+      body: SafeArea( 
+        child: Consumer<ProductDetailViewModel>(
           builder: (context, viewModel, child) {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -43,11 +48,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Product Image
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      widget.product.image,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.product.image,
+                      cacheManager: CustomImageCacheManager.instance,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => const SizedBox(
+                        height: 200,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      ),
+                      errorWidget: (context, url, error) => const SizedBox(
+                        height: 200,
+                        child: Center(child: Icon(Icons.broken_image)),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -100,25 +114,38 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Purchase Button
                   ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Center(
-                      child: Text("Me lo merco →",
-                          style: TextStyle(fontSize: 18, color: Colors.white)),
+                  onPressed: () async {
+                    final uid = FirebaseAuth.instance.currentUser?.uid;
+                    if (uid != null) {
+                      final cartRepository = CartRepository();
+                      await cartRepository.addToCart(uid, widget.product);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Producto agregado al carrito")),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Me lo merco →",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
+                ),
                 ],
               ),
             );
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildInfoBar(Product product, String businessName, String businessDistance, BuildContext context) {
     final theme = Theme.of(context);
