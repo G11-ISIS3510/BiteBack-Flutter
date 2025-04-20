@@ -2,6 +2,7 @@ import 'package:biteback/models/product_model.dart';
 import 'package:biteback/repositories/analytics_repository.dart';
 import 'package:biteback/repositories/business_repository.dart';
 import 'package:biteback/repositories/products_repository.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/business_model.dart';
 import '../models/user_location_model.dart';
 import '../services/location_service.dart';
+import 'dart:convert';
 
 class HomeViewModel extends ChangeNotifier {
 
@@ -30,6 +32,9 @@ class HomeViewModel extends ChangeNotifier {
   String _selectedCategory = "";
   String _searchQuery = "";
   final Map<String, String> _businessNames = {};
+  bool _isOffline = false;
+
+
 
   // Getters para obtener los atributos
   String get userName => _userName;
@@ -44,14 +49,22 @@ class HomeViewModel extends ChangeNotifier {
   List<Product> get recentSearchResults => _recentSearchResults;
   String get searchQuery => _searchQuery;
   Map<String, String> get businessNames => _businessNames;
+  bool get isOffline => _isOffline;
 
   // Carga de los datos del usuario y categorias
   HomeViewModel() {
     _loadHomeData();
   }
 
+  // Metodo para verificar si se cuenta con conexion en el dispositivo
+  Future<bool> hasConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    return !connectivityResult.contains(ConnectivityResult.none);
+  }
+
   Future<void> _loadHomeData() async {
     final Stopwatch stopwatch = Stopwatch()..start(); 
+    _isOffline = !(await hasConnection());
 
     await _loadUserData();
     await _loadCategories();
@@ -59,7 +72,7 @@ class HomeViewModel extends ChangeNotifier {
 
     stopwatch.stop(); 
     double loadTime = stopwatch.elapsedMilliseconds / 1000.0; 
-    await _analyticsRepository.addLoadTimeHomePage(loadTime); 
+    if (!_isOffline) await _analyticsRepository.addLoadTimeHomePage(loadTime); 
   }
 
 
@@ -67,43 +80,77 @@ class HomeViewModel extends ChangeNotifier {
   // Támbien carga los restaurantes, productos y los asocia
   Future<void> _loadUserData() async {
 
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _userName = user.displayName ?? user.email ?? "Usuario";
-    }
-
-    // 
-    Position? position = await LocationService.getCurrentPosition();
-    if (position != null) {
-      _location = UserLocation(latitude: position.latitude, longitude: position.longitude);
-      _address = await LocationService.getAddressFromCoordinates(position);
-    } else {
-      _address = "No se pudo obtener la ubicación.";
-    }
-
-    notifyListeners();
-
-    // Espera a la carga de los recursos
-    await Future.wait([
-      _loadRestaurants(),
-      _loadProducts(),
-    ]);
-
-    // Linkea y carga productos cercanos
-    _linkProductsToRestaurants();
-    _loadNearbyProducts();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    _userName = user.displayName ?? user.email ?? "Usuario";
   }
+
+  // Verificar si hay conexión a Internet
+  _isOffline = !(await hasConnection());
+
+  if (_isOffline) {
+    _address = "Ubicación no disponible debido a la falta de conexión a internet.";
+  } else {
+    // Obtener la ubicación solo si hay conexión
+    try {
+      Position? position = await LocationService.getCurrentPosition();
+      if (position != null) {
+        _location = UserLocation(latitude: position.latitude, longitude: position.longitude);
+        _address = await LocationService.getAddressFromCoordinates(position);
+      } else {
+        _address = "No se pudo obtener la ubicación.";
+      }
+    } catch (e) {
+      _address = "No se pudo obtener la ubicación: $e";
+    }
+  }
+
+  notifyListeners();
+
+  // Espera a la carga de los recursos
+  await Future.wait([
+    _loadRestaurants(),
+    _loadProducts(),
+  ]);
+
+  // Linkea y carga productos cercanos
+  _linkProductsToRestaurants();
+  _loadNearbyProducts();
+
+  if (!_isOffline) {
+    await _cacheRestaurants();
+    await _cacheProducts();
+  }
+}
 
   // Método para cargar los restaurantes
   Future<void> _loadRestaurants() async {
-    _allRestaurants = await _businessRepository.getRestaurants();
+    try {
+      if (_isOffline) {
+        _allRestaurants = await _loadCachedRestaurants();
+      } else {
+        _allRestaurants = await _businessRepository.getRestaurants();
+        await _cacheRestaurants();
+      }
+    } catch (_) {
+      _allRestaurants = await _loadCachedRestaurants();
+    }
     notifyListeners();
   }
 
   // Método para cargar los productos
   Future<void> _loadProducts() async {
-    _allProducts = await _productsRepository.getProducts();
-    _filteredProducts = _allProducts;
+    try {
+      if (_isOffline) {
+        _allProducts = await _loadCachedProducts();
+      } else {
+        _allProducts = await _productsRepository.getProducts();
+        await _cacheProducts();
+      }
+      _filteredProducts = _allProducts;
+    } catch (_) {
+      _allProducts = await _loadCachedProducts();
+    }
     notifyListeners();
   }
 
@@ -141,7 +188,16 @@ class HomeViewModel extends ChangeNotifier {
 
   // Método para cargar las categorias
   Future<void> _loadCategories() async {
-    _categories = await _productsRepository.getUniqueCategories();
+    try {
+      if (_isOffline) {
+        _categories = await _loadCachedCategories();
+      } else {
+        _categories = await _productsRepository.getUniqueCategories();
+        await _cacheCategories();
+      }
+    } catch (_) {
+      _categories = await _loadCachedCategories();
+    }
     notifyListeners();
   }
 
@@ -158,7 +214,7 @@ class HomeViewModel extends ChangeNotifier {
   // Método para hacer el filtrado de productos
   void filterProducts(String query) {
     // Actualizando la analítica
-    _analyticsRepository.addSearch(query);
+    if (!_isOffline) _analyticsRepository.addSearch(query);
     _searchQuery = query; 
 
     _filteredProducts = _allProducts.where((product) {
@@ -238,6 +294,49 @@ class HomeViewModel extends ChangeNotifier {
 
     // Notificar a los listeners para actualizar la UI
     notifyListeners();
+  }
+
+  Future<void> _cacheRestaurants() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = _allRestaurants.map((r) => r.toJson()).toList();
+    await prefs.setString('cachedRestaurants', jsonEncode(jsonList));
+  }
+
+  Future<List<Business>> _loadCachedRestaurants() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString('cachedRestaurants');
+    if (jsonStr != null) {
+      final List list = jsonDecode(jsonStr);
+      return list.map((e) => Business.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  Future<void> _cacheProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = _allProducts.map((p) => p.toJson()).toList();
+    await prefs.setString('cachedProducts', jsonEncode(jsonList));
+  }
+
+  Future<List<Product>> _loadCachedProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString('cachedProducts');
+    if (jsonStr != null) {
+      final List list = jsonDecode(jsonStr);
+      return list.map((e) => Product.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  Future<void> _cacheCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('cachedCategories', _categories.toList());
+  }
+
+  Future<Set<String>> _loadCachedCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList('cachedCategories');
+    return list?.toSet() ?? {};
   }
 }
 

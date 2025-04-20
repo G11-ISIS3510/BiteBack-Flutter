@@ -22,21 +22,51 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         bottomNavigationBar: CustomBottomNavBar(),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                SearchBarWithVoice(),
-                DiscountBanner(),
-                ExploreBanners(),
-                _buildCategories(),
-                _buildAllProducts(), 
-                _buildRecentSearches(),
-                _buildNearbyProducts(),
-              ],
-            ),
+          child: Consumer<HomeViewModel>(
+            builder: (context, viewModel, child) {
+              return Column(
+                children: [
+                  if (viewModel.isOffline)
+                    Container(
+                      width: double.infinity,
+                      color: Colors.red,
+                      padding: EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.wifi_off, color: Colors.white),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "No hay conexión a internet.",
+                              style: TextStyle(color: Colors.white),
+                              overflow: TextOverflow.ellipsis, // Agrega esta línea
+                              maxLines: 1, // Limita el número de líneas a 1
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(),
+                          SearchBarWithVoice(),
+                          DiscountBanner(),
+                          ExploreBanners(),
+                          _buildCategories(),
+                          _buildAllProducts(), 
+                          _buildRecentSearches(),
+                          _buildNearbyProducts(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -148,6 +178,40 @@ Widget _categoryCard(String category, String selectedCategory, Function(String) 
   Widget _buildNearbyProducts() {
   return Consumer<HomeViewModel>(
     builder: (context, viewModel, child) {
+      if (viewModel.isOffline) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Productos cercanos",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.wifi_off, size: 48, color: Colors.grey),
+                    const SizedBox(height: 12),
+                    Text(
+                      "No se pueden calcular los productos cercanos",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Asegúrate de estar conectado a internet.",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
       if (viewModel.nearbyProducts.isEmpty) {
         return Padding(
           padding: const EdgeInsets.all(16.0),

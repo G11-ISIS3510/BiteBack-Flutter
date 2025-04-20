@@ -45,7 +45,7 @@ class LocationService {
       }
     } 
     catch (e) {
-      return "Error obteniendo dirección: $e";
+      return "No hay conexión a internet.";
     }
   }
 }
