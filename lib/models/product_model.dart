@@ -1,6 +1,4 @@
 class Product {
-
-  // Atributos que modelan un producto en la aplicación
   final String id;
   final String category;
   final String name;
@@ -22,6 +20,36 @@ class Product {
     required this.discount,
     required this.description,
     required this.expirationDate,
-    required this.businessId
+    required this.businessId,
   });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      category: json['category'],
+      name: json['name'],
+      image: json['image'],
+      categoryImage: json['categoryImage'],
+      price: (json['price'] as num).toDouble(),
+      discount: (json['discount'] as num).toDouble(),
+      description: json['description'],
+      expirationDate: DateTime.parse(json['expirationDate']),
+      businessId: json['businessId'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'category': category,
+      'name': name,
+      'image': image,
+      'categoryImage': categoryImage,
+      'price': price,
+      'discount': discount,
+      'description': description,
+      'expirationDate': expirationDate.toIso8601String(),
+      'businessId': businessId,
+    };
+  }
 }
