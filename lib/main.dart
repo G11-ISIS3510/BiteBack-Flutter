@@ -1,4 +1,5 @@
 import 'package:biteback/models/product_model.dart';
+import 'package:biteback/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,7 +8,7 @@ import 'viewmodels/auth_viewmodel.dart';
 import 'views/home_screen_view.dart';
 import 'views/auth_screen.dart';
 import 'services/navigation_service.dart';
-import 'views/product_detail_screen.dart'; 
+import 'views/product_detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,17 +36,20 @@ class MyApp extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness:
+            themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        navigatorKey: NavigationService().navigatorKey, 
+        navigatorKey: NavigationService().navigatorKey,
         initialRoute: "/",
         routes: {
-          "/": (context) => AuthScreen(isRegister: true),
-          "/login": (context) => AuthScreen(isRegister: false),
+          "/": (context) => const SplashScreen(),
+          "/login": (context) => const AuthScreen(isRegister: false),
           "/home": (context) => HomeScreen(),
-          "/productDetail": (context) => ProductDetailScreen(product: ModalRoute.of(context)!.settings.arguments as Product),
+          "/productDetail": (context) => ProductDetailScreen(
+              product:
+                  ModalRoute.of(context)!.settings.arguments as Product),
         },
         themeMode: themeProvider.themeMode,
         theme: ThemeData.light(),

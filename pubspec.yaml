@@ -40,6 +40,7 @@ dependencies:
   speech_to_text: ^6.1.1
   permission_handler: ^11.0.1
   jiffy: ^6.3.2
+  shared_preferences: ^2.5.3
   
 
   # The following adds the Cupertino Icons font to your application.

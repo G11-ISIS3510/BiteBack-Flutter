@@ -5,6 +5,7 @@ import 'package:biteback/repositories/products_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/business_model.dart';
 import '../models/user_location_model.dart';
 import '../services/location_service.dart';
@@ -24,6 +25,7 @@ class HomeViewModel extends ChangeNotifier {
   List<Product> _allProducts = [];
   List<Product> _nearbyProducts = [];
   List<Product> _filteredProducts = [];
+  List<Product> _recentSearchResults = [];
   Set<String> _categories = {};
   String _selectedCategory = "";
   String _searchQuery = "";
@@ -39,6 +41,7 @@ class HomeViewModel extends ChangeNotifier {
   List<Product> get allProducts => _allProducts;
   List<Product> get nearbyProducts => _nearbyProducts;
   List<Product> get filteredProducts => _filteredProducts; 
+  List<Product> get recentSearchResults => _recentSearchResults;
   String get searchQuery => _searchQuery;
   Map<String, String> get businessNames => _businessNames;
 
@@ -52,6 +55,7 @@ class HomeViewModel extends ChangeNotifier {
 
     await _loadUserData();
     await _loadCategories();
+    await _loadLastSearchResults();
 
     stopwatch.stop(); 
     double loadTime = stopwatch.elapsedMilliseconds / 1000.0; 
@@ -163,12 +167,76 @@ class HomeViewModel extends ChangeNotifier {
       return matchesQuery && matchesCategory;
     }).toList();
 
+    if (_filteredProducts.isNotEmpty) {
+      for (final product in filteredProducts) {
+        addRecentSearch(product);
+      }
+    }
     notifyListeners(); 
   }
 
   // Método para resetear la lista de productos filtrados
   void resetProducts() {
     _filteredProducts = List.from(_allProducts);
+    notifyListeners();
+  }
+
+  // Metodo para añadir un busqueda a la lista de busquedas recientes
+  Future<void> addRecentSearch(Product product) async {
+    // Condicon para evitar que aparezcan busquedas duplicadas
+    _recentSearchResults.removeWhere((r) => r.id == product.id); 
+    // Se agrega la nueva busqueda al inicio
+    _recentSearchResults.insert(0, product);
+    // Se mantienen unicamente las diez busquedas mas recientes 
+    if (_recentSearchResults.length > 10) {
+      _recentSearchResults = _recentSearchResults.sublist(0, 10); // máximo 10
+    }
+    await _saveLastSearchResults(); 
+    notifyListeners();
+  }
+
+  // Metodo para guardar las ultimas busquedas realizadas por el usuario
+  Future<void> _saveLastSearchResults() async {
+    // Se obtiene la instancia de las preferencias locales usada para almacenar la informacion
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> idList = _recentSearchResults.map((product) {
+      return product.id.toString();
+    }).toList();
+    await prefs.setStringList('lastSearchResults', idList);
+  }
+
+  // Metodo que se encarga de cargar los resultados de las ultimas busquedas
+  Future<void> _loadLastSearchResults() async {
+    // Se obtiene la instancia de las preferencias locales usada para almacenar la informacion
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? idList = prefs.getStringList('lastSearchResults');
+
+    // Si existen busquedas recientes, se obtiene sus resultados
+    if (idList != null) {
+      _recentSearchResults = idList.map((id) {
+        try {
+          return _allProducts.firstWhere((r) => r.id == id);
+        } 
+        catch (_) {
+          return null; 
+        }
+      }).whereType<Product>().toList();
+    } 
+    else {
+      _recentSearchResults = [];
+    }
+    notifyListeners();
+  }
+
+  // Método que se encarga de limpiar las búsquedas recientes
+  Future<void> clearRecentSearches() async {
+    // Limpiar la lista en memoria
+    recentSearchResults.clear();
+    // Limpiar las búsquedas recientes en SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('lastSearchResults'); 
+
+    // Notificar a los listeners para actualizar la UI
     notifyListeners();
   }
 }
