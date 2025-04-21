@@ -17,6 +17,7 @@ class _CartScreenState extends State<CartScreen> {
   List<CartItem> _cartItems = [];
   bool _loading = true;
   double? _sessionStartTime;
+  bool _paymentCompleted = false;
 
   @override
   void initState() {
@@ -56,6 +57,10 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> _finalizePurchase() async {
+
+    if (_paymentCompleted) return;
+    _paymentCompleted = true;
+
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null || _sessionStartTime == null) return;
 
