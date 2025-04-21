@@ -1,9 +1,7 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
 import 'package:biteback/cache/custom_image_cache_manager.dart';
-import 'package:biteback/repositories/cart_repository.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
@@ -40,6 +38,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       body: SafeArea( 
         child: Consumer<ProductDetailViewModel>(
           builder: (context, viewModel, child) {
+            if (viewModel.offlineQueuedMessageShown) {
+              Future.microtask(() {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("El producto será agregado al carrito cuando se restablezca la conexión."),
+                    duration: Duration(seconds: 4),
+                    ),
+                );
+                viewModel.resetOfflineMessageFlag();
+              });
+
+            }
+
+            if (viewModel.productAdded) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Producto agregado al carrito")),);
+                viewModel.resetProductAdded();
+              });
+            }
+            
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -113,18 +131,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 20),
 
                   // Purchase Button
+                  
                   ElevatedButton(
-                  onPressed: () async {
-                    final uid = FirebaseAuth.instance.currentUser?.uid;
-                    if (uid != null) {
-                      final cartRepository = CartRepository();
-                      await cartRepository.addToCart(uid, widget.product);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Producto agregado al carrito")),
-                      );
-                    }
-                  },
+                  onPressed: () => viewModel.addToCart(widget.product),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -136,7 +145,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
-                ),
+                  ),
+                  
                 ],
               ),
             );
