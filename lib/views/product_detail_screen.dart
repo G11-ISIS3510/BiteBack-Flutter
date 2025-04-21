@@ -93,7 +93,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 10),
 
                   // Updated Info Bar
-                  _buildInfoBar(widget.product, viewModel.businessName, viewModel.businessDistance, context),
+                  _buildInfoBar(widget.product, viewModel.businessName, viewModel.businessDistance, context),   
 
                   const SizedBox(height: 20),
 
@@ -158,7 +158,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _infoCard("$remainingHours horas", "Para vencer", theme),
       _infoCard("$discountPercentage%", "Descuento", theme),
       _infoCard(businessName, "Tienda", theme),
-      _infoCard(businessDistance, "Distancia", theme),
+      if (viewModel.hasConnection)
+        _infoCard(businessDistance, "Distancia", theme),
     ];
 
     return LayoutBuilder(

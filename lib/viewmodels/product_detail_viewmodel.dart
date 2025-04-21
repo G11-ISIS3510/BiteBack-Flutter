@@ -4,6 +4,9 @@ import 'package:geolocator/geolocator.dart';
 import '../models/product_model.dart';
 import '../models/business_model.dart';
 import '../repositories/business_repository.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
 
 class ProductDetailViewModel extends ChangeNotifier {
   // Dependencias para el manejo de datos
@@ -17,8 +20,17 @@ class ProductDetailViewModel extends ChangeNotifier {
   String get businessName => _businessName;
   String get businessDistance => _businessDistance;
 
+  bool _hasConnection = true;
+  bool get hasConnection => _hasConnection;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+
+  Product? _lastFetchedProduct;
+
   // Inicialización del ViewModel (llamar en initState)
   Future<void> init(Product product) async {
+    _lastFetchedProduct = product;
+    _monitorConnectivity();
+
     await _getUserLocation();
     if (_userLocation != null) {
       await fetchBusinessDetails(product);
@@ -68,4 +80,28 @@ class ProductDetailViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+
+  void _monitorConnectivity() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) async {
+      final connected = results.any((r) => r != ConnectivityResult.none);
+
+      if(_hasConnection != connected){
+        _hasConnection = connected;
+        notifyListeners();
+
+        if (connected && _userLocation != null) {
+          await fetchBusinessDetails(_lastFetchedProduct!);
+        }
+      }
+
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
 }
