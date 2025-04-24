@@ -11,6 +11,8 @@ import '../models/business_model.dart';
 import '../models/user_location_model.dart';
 import '../services/location_service.dart';
 import 'dart:convert';
+import 'dart:async';
+
 
 class HomeViewModel extends ChangeNotifier {
 
@@ -50,10 +52,18 @@ class HomeViewModel extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   Map<String, String> get businessNames => _businessNames;
   bool get isOffline => _isOffline;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  bool _wasPreviouslyOffline = false;
+
+  bool get wasPreviouslyOffline => _wasPreviouslyOffline;
+
+
+  
 
   // Carga de los datos del usuario y categorias
   HomeViewModel() {
     _loadHomeData();
+    _startConnectivityListener();
   }
 
   // Metodo para verificar si se cuenta con conexion en el dispositivo
@@ -338,6 +348,28 @@ class HomeViewModel extends ChangeNotifier {
     final list = prefs.getStringList('cachedCategories');
     return list?.toSet() ?? {};
   }
+
+  set wasPreviouslyOffline(bool value) {
+    _wasPreviouslyOffline = value;
+  }
+
+  void _startConnectivityListener() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+      final hasConnection = results.any((r) => r != ConnectivityResult.none);
+      if (_isOffline != !hasConnection) {
+        _isOffline = !hasConnection;
+        notifyListeners();
+      }
+    });
+  }
+
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
 }
 
 

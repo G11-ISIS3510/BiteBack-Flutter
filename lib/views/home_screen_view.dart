@@ -24,6 +24,25 @@ class HomeScreen extends StatelessWidget {
         body: SafeArea(
           child: Consumer<HomeViewModel>(
             builder: (context, viewModel, child) {
+              if (!viewModel.isOffline && viewModel.wasPreviouslyOffline) {
+                Future.microtask(() {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Conexión recuperada"),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  viewModel.wasPreviouslyOffline = false;
+                });
+              }
+
+              if (viewModel.isOffline && !viewModel.wasPreviouslyOffline) {
+                viewModel.wasPreviouslyOffline = true;
+              }
+                            
+
+
               return Column(
                 children: [
                   if (viewModel.isOffline)
