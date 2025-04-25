@@ -1,5 +1,7 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
+import 'package:biteback/cache/custom_image_cache_manager.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
@@ -26,15 +28,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double discountedPrice =
-        widget.product.price - ((widget.product.price * widget.product.discount) / 100);
+  final double discountedPrice =
+      widget.product.price - ((widget.product.price * widget.product.discount) / 100);
 
-    return ChangeNotifierProvider(
-      create: (_) => viewModel,
-      child: Scaffold(
-        appBar: AppBar(title: Text(widget.product.name)),
-        body: Consumer<ProductDetailViewModel>(
+  return ChangeNotifierProvider(
+    create: (_) => viewModel,
+    child: Scaffold(
+      appBar: AppBar(title: Text(widget.product.name)),
+      body: SafeArea( 
+        child: Consumer<ProductDetailViewModel>(
           builder: (context, viewModel, child) {
+            if (viewModel.offlineQueuedMessageShown) {
+              Future.microtask(() {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("El producto será agregado al carrito cuando se restablezca la conexión."),
+                    duration: Duration(seconds: 4),
+                    ),
+                );
+                viewModel.resetOfflineMessageFlag();
+              });
+
+            }
+
+            if (viewModel.productAdded) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Producto agregado al carrito")),);
+                viewModel.resetProductAdded();
+              });
+            }
+            
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -43,11 +66,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Product Image
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      widget.product.image,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.product.image,
+                      cacheManager: CustomImageCacheManager.instance,
                       height: 200,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => const SizedBox(
+                        height: 200,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      ),
+                      errorWidget: (context, url, error) => const SizedBox(
+                        height: 200,
+                        child: Center(child: Icon(Icons.broken_image)),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -79,7 +111,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 10),
 
                   // Updated Info Bar
-                  _buildInfoBar(widget.product, viewModel.businessName, viewModel.businessDistance, context),
+                  _buildInfoBar(widget.product, viewModel.businessName, viewModel.businessDistance, context),   
 
                   const SizedBox(height: 20),
 
@@ -99,26 +131,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 20),
 
                   // Purchase Button
+                  
                   ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Center(
-                      child: Text("Me lo merco →",
-                          style: TextStyle(fontSize: 18, color: Colors.white)),
+                  onPressed: () => viewModel.addToCart(widget.product),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Me lo merco →",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
+                  ),
+                  
                 ],
               ),
             );
           },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildInfoBar(Product product, String businessName, String businessDistance, BuildContext context) {
     final theme = Theme.of(context);
@@ -131,7 +168,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _infoCard("$remainingHours horas", "Para vencer", theme),
       _infoCard("$discountPercentage%", "Descuento", theme),
       _infoCard(businessName, "Tienda", theme),
-      _infoCard(businessDistance, "Distancia", theme),
+      if (viewModel.hasConnection)
+        _infoCard(businessDistance, "Distancia", theme),
     ];
 
     return LayoutBuilder(

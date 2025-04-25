@@ -1,13 +1,15 @@
 import 'package:biteback/models/product_model.dart';
+import 'package:biteback/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'viewmodels/auth_viewmodel.dart';
+import 'views/cart_screen.dart';
 import 'views/home_screen_view.dart';
 import 'views/auth_screen.dart';
 import 'services/navigation_service.dart';
-import 'views/product_detail_screen.dart'; 
+import 'views/product_detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,18 +37,39 @@ class MyApp extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness:
+            themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
       ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        navigatorKey: NavigationService().navigatorKey, 
+        navigatorKey: NavigationService().navigatorKey,
+        
         initialRoute: "/",
-        routes: {
-          "/": (context) => AuthScreen(isRegister: true),
-          "/login": (context) => AuthScreen(isRegister: false),
-          "/home": (context) => HomeScreen(),
-          "/productDetail": (context) => ProductDetailScreen(product: ModalRoute.of(context)!.settings.arguments as Product),
+        onGenerateRoute: (settings) {
+          switch (settings.name) {
+            case '/':
+              return MaterialPageRoute(builder: (_) => const SplashScreen());
+            case '/login':
+              return MaterialPageRoute(builder: (_) => const AuthScreen(isRegister: false));
+            case '/home':
+              return MaterialPageRoute(builder: (_) => HomeScreen());
+            case '/cart':
+              return MaterialPageRoute(builder: (_) => const CartScreen());
+            
+            case '/productDetail':
+              final product = settings.arguments as Product;
+              return MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: product),
+              );
+            default:
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(
+                  body: Center(child: Text("Ruta no encontrada")),
+                ),
+              );
+          }
         },
+
         themeMode: themeProvider.themeMode,
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
