@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/profile_viewmodel.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -16,7 +15,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-
 
   @override
   void dispose() {
@@ -42,7 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             nameController.text = profile.displayName ?? "";
             phoneController.text = profile.phoneNumber ?? "";
 
-
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -50,7 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   GestureDetector(
                     onTap: () async {
                       final picker = ImagePicker();
-                      final picked = await picker.pickImage(source: ImageSource.gallery);
+                      final picked =
+                          await picker.pickImage(source: ImageSource.gallery);
                       if (picked != null) {
                         vm.profile?.localProfileImagePath = picked.path;
                         vm.notifyListeners();
@@ -81,25 +79,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: const InputDecoration(labelText: "Nombre"),
                   ),
                   const SizedBox(height: 16),
-TextField(
-  controller: phoneController,
-  keyboardType: TextInputType.phone,
-  onChanged: (value) {
-    vm.profile?.phoneNumber = value;
-  },
-  decoration: const InputDecoration(labelText: "Teléfono"),
-),
-
-const SizedBox(height: 8),
-Row(
-  children: [
-    const Icon(Icons.star, color: Colors.amber),
-    const SizedBox(width: 8),
-    Text("Puntos: ${profile.earnedPoints}"),
-  ],
-),
-
-
+                  TextField(
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    onChanged: (value) {
+                      vm.profile?.phoneNumber = value;
+                    },
+                    decoration: const InputDecoration(labelText: "Teléfono"),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Text("Puntos: ${profile.earnedPoints}"),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () async {

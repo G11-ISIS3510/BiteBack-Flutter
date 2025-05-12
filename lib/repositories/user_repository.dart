@@ -3,7 +3,6 @@ import 'package:biteback/models/user_profile_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../models/user_model.dart';
 
 class UserRepository {
@@ -43,31 +42,16 @@ class UserRepository {
   }
 
   Future<void> updateUserProfileRemote(UserProfile profile) async {
-    String? downloadUrl;
-
-    // Subimos imagen si hay local
-    if (profile.localProfileImagePath != null) {
-      final file = File(profile.localProfileImagePath!);
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child("profile_images/${profile.uid}.jpg");
-
-      final uploadTask = await storageRef.putFile(file);
-      downloadUrl = await uploadTask.ref.getDownloadURL();
-
-      profile.profileImageUrl = downloadUrl;
-    }
-
     final userModel = UserModel(
       uid: profile.uid,
       email: profile.email,
       phoneNumber: profile.phoneNumber ?? "",
-      profileImage: profile.profileImageUrl ?? "",
+      profileImage: profile.profileImageUrl ?? "", // se mantiene por compatibilidad
       earnedPoints: profile.earnedPoints,
       deviceModel: profile.deviceModel,
       displayName: profile.displayName,
     );
 
-    await updateUserData(userModel); // ← CORREGIDO: sin _userRepository
+    await updateUserData(userModel);
   }
 }
