@@ -32,7 +32,7 @@ class CustomBottomNavBar extends StatelessWidget {
       Navigator.pushNamed(context, '/home');
       break;
     case 1:
-      // Misterio – puedes dejarlo vacío o implementar algo luego
+      Navigator.pushNamed(context, '/mystery');
       break;
     case 2:
       Navigator.pushNamed(context, '/cart');

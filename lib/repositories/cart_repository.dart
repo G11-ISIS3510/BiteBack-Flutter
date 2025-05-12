@@ -150,4 +150,27 @@ Future<String> getOrCreateCartSession(String uid) async {
         .doc(productId)
         .update({'quantity': quantity});
   }
+
+  Future<void> addMysteryBoxProducts(String uid, List<Product> products) async {
+    for (final product in products) {
+      final cartItem = CartItem(
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        discount: product.discount,
+        image: product.image,
+        quantity: 1,
+        isMysteryBox: true,
+      );
+
+      await _firestore
+          .collection("users")
+          .doc(uid)
+          .collection("cart")
+          .doc(product.id)
+          .set(cartItem.toMap(), SetOptions(merge: true));
+    }
+  }
+
+  
 }
