@@ -11,7 +11,7 @@ import 'views/home_screen_view.dart';
 import 'views/auth_screen.dart';
 import 'services/navigation_service.dart';
 import 'views/product_detail_screen.dart';
-
+import 'views/mystery_box_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -58,6 +58,8 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(builder: (_) => const CartScreen());
             case '/profile':
               return MaterialPageRoute(builder: (_) => const ProfileScreen());
+            case '/mystery':
+              return MaterialPageRoute(builder: (_) => const MysteryBoxView());
             
             case '/productDetail':
               final product = settings.arguments as Product;
