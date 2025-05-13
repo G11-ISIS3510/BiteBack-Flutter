@@ -5,6 +5,8 @@ class UserModel {
   final String? profileImage;
   final int earnedPoints;
   final String? deviceModel;
+  final String? displayName;
+
 
   UserModel({
     required this.uid,
@@ -13,6 +15,8 @@ class UserModel {
     this.profileImage,
     this.earnedPoints = 0,
     this.deviceModel,
+    this.displayName,
+
   });
 
   Map<String, dynamic> toMap() {
@@ -24,6 +28,8 @@ class UserModel {
       'earned_points': earnedPoints,
       'device_model': deviceModel ?? "",
       'created_at': DateTime.now(),
+      'display_name': displayName ?? "",
+
     };
   }
 
@@ -35,6 +41,8 @@ class UserModel {
       profileImage: map['profile_image'],
       earnedPoints: map['earned_points'] ?? 0,
       deviceModel: map['device_model'],
+      displayName: map['display_name'],
+
     );
   }
 }

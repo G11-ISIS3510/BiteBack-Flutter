@@ -1,4 +1,5 @@
 import 'package:biteback/models/product_model.dart';
+import 'package:biteback/views/profile_screen.dart';
 import 'package:biteback/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +56,8 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(builder: (_) => HomeScreen());
             case '/cart':
               return MaterialPageRoute(builder: (_) => const CartScreen());
+            case '/profile':
+              return MaterialPageRoute(builder: (_) => const ProfileScreen());
             
             case '/productDetail':
               final product = settings.arguments as Product;
