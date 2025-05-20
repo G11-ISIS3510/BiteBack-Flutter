@@ -30,7 +30,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _loadUserLocation() async {
+  try {
     final position = await LocationService.getCurrentPosition();
+
+    if (!mounted) return;
 
     if (position != null) {
       setState(() {
@@ -39,10 +42,17 @@ class _MapScreenState extends State<MapScreen> {
       });
     } else {
       setState(() {
-        loading = false; // Mostrar mapa solo con el restaurante
+        loading = false;
       });
     }
+  } catch (e) {
+    if (!mounted) return;
+    setState(() {
+      loading = false;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

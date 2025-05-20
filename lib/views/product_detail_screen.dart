@@ -249,10 +249,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   children: [infoItems[0], infoItems[1]],
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [infoItems[2], infoItems[3]],
-                ),
+                if (infoItems.length >= 4)
+  Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [infoItems[2], infoItems[3]],
+  )
+else if (infoItems.length == 3)
+  Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [infoItems[2]],
+  )
               ],
             ),
           );
