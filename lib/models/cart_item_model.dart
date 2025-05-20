@@ -5,6 +5,7 @@ class CartItem {
   final double discount;      // Descuento en porcentaje (ej. 35.0)
   final String image;
   final int quantity;
+  final bool isMysteryBox;
 
   CartItem({
     required this.productId,
@@ -13,6 +14,7 @@ class CartItem {
     required this.discount,
     required this.image,
     this.quantity = 1,
+    this.isMysteryBox = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class CartItem {
       'discount': discount,
       'image': image,
       'quantity': quantity,
+      'isMysteryBox': isMysteryBox,
     };
   }
 
@@ -34,6 +37,7 @@ class CartItem {
       discount: map['discount'].toDouble(),
       image: map['image'],
       quantity: map['quantity'] ?? 1,
+      isMysteryBox: map['isMysteryBox'] ?? false,
     );
   }
 
