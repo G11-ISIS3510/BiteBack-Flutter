@@ -21,6 +21,7 @@ class ProductDetailViewModel extends ChangeNotifier {
   String _businessDistance = "Cargando...";
   Position? _userLocation; // Guarda la ubicación del usuario
 
+
   String get businessName => _businessName;
   String get businessDistance => _businessDistance;
 
@@ -36,6 +37,15 @@ class ProductDetailViewModel extends ChangeNotifier {
 
   Product? _lastFetchedProduct;
   Product? _queuedCartProduct;
+
+
+  // Atributos para manejar la ubicacion del negocio
+  double? _businessLatitude;
+  double? _businessLongitude;
+
+  // Getter para obtener las coordenadas del negocio
+  double? get businessLatitude => _businessLatitude;
+  double? get businessLongitude => _businessLongitude;
 
   // Inicialización del ViewModel (llamar en initState)
   Future<void> init(Product product) async {
@@ -83,8 +93,14 @@ class ProductDetailViewModel extends ChangeNotifier {
         _userLocation!.longitude,
         business.latitude,
         business.longitude,
+        
       ) / 1000; // Convertir metros a km
 
+
+      // Se actualizan los valores de ubicacion para su uso futuro
+      _businessLatitude = business.latitude;
+      _businessLongitude = business.longitude;
+      
       _businessDistance = "${distance.toStringAsFixed(1)} km";
     } else {
       _businessDistance = "No disponible";
