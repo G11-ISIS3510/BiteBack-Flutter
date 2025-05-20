@@ -1,6 +1,8 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
 import 'package:biteback/cache/custom_image_cache_manager.dart';
+import 'package:biteback/models/user_location_model.dart';
+import 'package:biteback/views/map_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -130,6 +132,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   const SizedBox(height: 20),
 
+                  ElevatedButton(
+                    onPressed: () {
+                      if (viewModel.businessLatitude != null && viewModel.businessLongitude != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MapScreen(
+                              restaurantLocation: UserLocation(
+                                latitude: viewModel.businessLatitude!,
+                                longitude: viewModel.businessLongitude!,
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Ubicación del negocio no disponible")),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Ver en el mapa",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   // Purchase Button
                   
                   ElevatedButton(
