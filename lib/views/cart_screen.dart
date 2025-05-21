@@ -5,6 +5,8 @@ import '../repositories/cart_repository.dart';
 import '../widgets/custom_bottom_navbar.dart';
 import 'payment_mock_screen.dart';
 import '../cache/mystery_box_cache.dart';
+import '../repositories/analytics_repository.dart';
+
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -15,6 +17,8 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final CartRepository _cartRepository = CartRepository();
+  final AnalyticsRepository _analyticsRepository = AnalyticsRepository(); // ← aquí
+
   List<CartItem> _cartItems = [];
   bool _loading = true;
   bool _isMysteryBox = false;
@@ -32,6 +36,8 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> _fetchCart() async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       final items = await _cartRepository.getCartItems(uid);
@@ -61,8 +67,14 @@ class _CartScreenState extends State<CartScreen> {
           _loading = false;
         });
       }
+
+      stopwatch.stop();
+      final loadTimeInSeconds = stopwatch.elapsedMilliseconds / 1000.0;
+      await _analyticsRepository.addLoadTimeCartPage(loadTimeInSeconds); // ← aquí
     }
   }
+
+
 
   Future<void> _updateQuantity(CartItem item, int delta) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
