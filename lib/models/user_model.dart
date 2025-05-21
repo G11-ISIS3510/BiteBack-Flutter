@@ -7,6 +7,11 @@ class UserModel {
   final String? deviceModel;
   final String? displayName;
 
+  // NUEVOS CAMPOS
+  final String? deviceManufacturer;
+  final String? androidVersion;
+  final int? androidSdk;
+  final bool? isPhysicalDevice;
 
   UserModel({
     required this.uid,
@@ -16,7 +21,10 @@ class UserModel {
     this.earnedPoints = 0,
     this.deviceModel,
     this.displayName,
-
+    this.deviceManufacturer,
+    this.androidVersion,
+    this.androidSdk,
+    this.isPhysicalDevice,
   });
 
   Map<String, dynamic> toMap() {
@@ -27,9 +35,12 @@ class UserModel {
       'profile_image': profileImage ?? "",
       'earned_points': earnedPoints,
       'device_model': deviceModel ?? "",
-      'created_at': DateTime.now(),
       'display_name': displayName ?? "",
-
+      'device_manufacturer': deviceManufacturer ?? "",
+      'android_version': androidVersion ?? "",
+      'android_sdk': androidSdk ?? -1,
+      'is_physical_device': isPhysicalDevice ?? false,
+      'created_at': DateTime.now(),
     };
   }
 
@@ -42,7 +53,10 @@ class UserModel {
       earnedPoints: map['earned_points'] ?? 0,
       deviceModel: map['device_model'],
       displayName: map['display_name'],
-
+      deviceManufacturer: map['device_manufacturer'],
+      androidVersion: map['android_version'],
+      androidSdk: map['android_sdk'],
+      isPhysicalDevice: map['is_physical_device'],
     );
   }
 }
