@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:biteback/models/user_profile_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
@@ -55,4 +56,19 @@ class UserRepository {
     final docRef = _firestore.collection("users").doc(user.uid);
     await docRef.update(user.toMap());
   }
+
+    Future<void> updateUserProfileRemote(UserProfile profile) async {
+    final userModel = UserModel(
+      uid: profile.uid,
+      email: profile.email,
+      phoneNumber: profile.phoneNumber ?? "",
+      profileImage: profile.profileImageUrl ?? "", // se mantiene por compatibilidad
+      earnedPoints: profile.earnedPoints,
+      deviceModel: profile.deviceModel,
+      displayName: profile.displayName,
+    );
+
+    await updateUserData(userModel);
+  }
 }
+
