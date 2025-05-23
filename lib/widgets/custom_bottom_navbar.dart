@@ -27,11 +27,22 @@ class CustomBottomNavBar extends StatelessWidget {
   showSelectedLabels: true,
   showUnselectedLabels: true,
   onTap: (index) {
-    if (index == 2) {
+  switch (index) {
+    case 0:
+      Navigator.pushNamed(context, '/home');
+      break;
+    case 1:
+      Navigator.pushNamed(context, '/mystery');
+      break;
+    case 2:
       Navigator.pushNamed(context, '/cart');
-    }
-    // Aquí podrías manejar los otros tabs si los usas luego
-  },
+      break;
+    case 3:
+      Navigator.pushNamed(context, '/profile');
+      break;
+  }
+},
+
   items: const [
     BottomNavigationBarItem(
       icon: Icon(Icons.home, size: 28),

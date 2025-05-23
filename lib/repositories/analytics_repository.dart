@@ -20,17 +20,31 @@ class AnalyticsRepository {
   }
 
   // Método encargado de añadir un tiempo de carga de la pantalla princiapl
-  Future<void> addLoadTimeHomePage(double loadtime) async {
-    try{
-      await _db.collection('homepage_load_time').add({
-        'load_time': loadtime,
-        'timestamp': FieldValue.serverTimestamp()
-      });
+    Future<void> addLoadTimeHomePage(double loadtime) async {
+      try{
+        await _db.collection('homepage_load_time').add({
+          'load_time': loadtime,
+          'timestamp': FieldValue.serverTimestamp()
+        });
+      }
+      catch(e){
+        return;
+      }
     }
-    catch(e){
-      return;
-    }
+
+    Future<void> addLoadTimeCartPage(double loadTime) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('cartpage_load_time')
+        .add({
+      'load_time': loadTime,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  } catch (e) {
+    return;
   }
+}
+
 
   // Método encargado de añadir una interacción con los productos listados
   Future<void> addClickInteractionProduct(String category, String name) async {

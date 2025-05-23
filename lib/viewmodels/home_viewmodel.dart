@@ -166,11 +166,15 @@ class HomeViewModel extends ChangeNotifier {
 
   // Método para asociar productos con restaurantes
   void _linkProductsToRestaurants() {
-    for (var restaurant in _allRestaurants) {
-      restaurant.products = _allProducts.where((product) => product.businessId == restaurant.id).toList();
-    }
-    notifyListeners();
+  for (int i = 0; i < _allRestaurants.length; i++) {
+    final restaurant = _allRestaurants[i];
+    restaurant.products = _allProducts
+        .where((product) => product.businessId == restaurant.id)
+        .toList();
   }
+  notifyListeners();
+}
+
 
   // Método para cargar los productos cercanos
   void _loadNearbyProducts() {
@@ -179,18 +183,19 @@ class HomeViewModel extends ChangeNotifier {
     const double maxDistance = 5000; 
     List<Product> nearbyProducts = [];
 
-    for (var restaurant in _allRestaurants) {
-      double distance = Geolocator.distanceBetween(
-        _location!.latitude, 
-        _location!.longitude, 
-        restaurant.latitude, 
-        restaurant.longitude
-      );
+    for (int i = 0; i < _allRestaurants.length; i++) {
+  final restaurant = _allRestaurants[i];
+  double distance = Geolocator.distanceBetween(
+    _location!.latitude,
+    _location!.longitude,
+    restaurant.latitude,
+    restaurant.longitude,
+  );
 
-      if (distance <= maxDistance) {
-        nearbyProducts.addAll(restaurant.products);
-      }
-    }
+  if (distance <= maxDistance) {
+    nearbyProducts.addAll(restaurant.products);
+  }
+}
 
     _nearbyProducts = nearbyProducts;
     notifyListeners();
@@ -234,9 +239,9 @@ class HomeViewModel extends ChangeNotifier {
     }).toList();
 
     if (_filteredProducts.isNotEmpty) {
-      for (final product in filteredProducts) {
-        addRecentSearch(product);
-      }
+      for (int i = 0; i < filteredProducts.length; i++) {
+  addRecentSearch(filteredProducts[i]);
+}
     }
     notifyListeners(); 
   }
