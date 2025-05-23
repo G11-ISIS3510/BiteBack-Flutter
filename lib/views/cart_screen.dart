@@ -41,7 +41,7 @@ class _CartScreenState extends State<CartScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       final items = await _cartRepository.getCartItems(uid);
-      final cachedBox = MysteryBoxCache().getCachedBox(uid);
+      final cachedBox = LruMysteryBoxCache().getCachedBox(uid);
       final mysteryIds = cachedBox?.map((p) => p.id).toSet() ?? {};
 
       bool allMatch = items.isNotEmpty &&

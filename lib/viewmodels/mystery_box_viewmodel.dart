@@ -36,7 +36,7 @@ class MysteryBoxViewModel extends ChangeNotifier {
     await _cartRepository.addMysteryBoxProducts(uid, selectedProducts);
 
     
-    MysteryBoxCache().cacheBox(uid, selectedProducts);
+    LruMysteryBoxCache().cacheBox(uid, selectedProducts);
 
     _loading = false;
     notifyListeners();
