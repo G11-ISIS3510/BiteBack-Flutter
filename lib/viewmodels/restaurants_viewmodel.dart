@@ -47,10 +47,12 @@ class RestaurantsViewModel extends ChangeNotifier {
 
   // Método para calcular los ratings semanales
   Future<void> fetchWeeklyRatings() async {
-    for (var restaurant in restaurants) {
-      double rating = await _ratingRepository.getWeeklyRating(restaurant.name);
-      _weeklyRatings[restaurant.name] = rating;
-    }
+    for (int i = 0; i < restaurants.length; i++) {
+  final restaurant = restaurants[i];
+  double rating = await _ratingRepository.getWeeklyRating(restaurant.name);
+  _weeklyRatings[restaurant.name] = rating;
+}
+
   }
 
   // Método que ordena por calificación general
